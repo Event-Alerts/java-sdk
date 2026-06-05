@@ -6,6 +6,7 @@ import gg.eventalerts.sdk.json.GSONProvider;
 import gg.eventalerts.sdk.object.EAObject;
 import gg.eventalerts.sdk.websocket.handler.SocketHandler;
 import gg.eventalerts.sdk.websocket.handler.SocketHandlerName;
+import gg.eventalerts.sdk.websocket.object.action.SocketAction;
 import gg.eventalerts.sdk.websocket.object.action.UpdateSubscriptionAction;
 import gg.eventalerts.sdk.websocket.handler.action.SocketActionHandler;
 import gg.eventalerts.sdk.websocket.handler.action.SocketActionName;
@@ -124,9 +125,9 @@ public class EAWebSocket extends WebSocketClient {
     }
 
     public <T extends EAObject> void send(@NotNull SocketActionName name, @NotNull T object) {
-        // Get action
-        final SocketActionHandler action = actions.get(name);
-        if (action == null) {
+        // Get handler
+        final SocketActionHandler handler = actions.get(name);
+        if (handler == null) {
             LOGGER.warn("Tried to send an invalid action: {}", name.name());
             return;
         }
@@ -135,13 +136,8 @@ public class EAWebSocket extends WebSocketClient {
         messagesSent++;
         lastMessageSentAt = new Date();
 
-        // Build JSON
-        final JsonObject json = new JsonObject();
-        json.addProperty("action", name.name());
-        json.add("data", GSONProvider.GSON.toJsonTree(object, action.getDataType()));
-
         // Send
-        send(json.toString());
+        send(GSONProvider.GSON.toJson(new SocketAction<>(name, object)));
     }
 
     @Override
@@ -160,7 +156,7 @@ public class EAWebSocket extends WebSocketClient {
             return;
         }
 
-        // Get event
+        // Get handler
         final SocketEventHandler<?> event = Mapper.convertJsonElement(json.get("event"), JsonPrimitive.class)
                 .flatMap(primitive -> Mapper.convertJsonPrimitive(primitive, String.class))
                 .flatMap(string -> Mapper.toEnum(string, SocketEventName.class))
