@@ -1,4 +1,4 @@
-package gg.eventalerts.sdk.websocket.object.event;
+package gg.eventalerts.sdk.websocket.message.event;
 
 import gg.eventalerts.sdk.object.Player;
 import org.jetbrains.annotations.NotNull;

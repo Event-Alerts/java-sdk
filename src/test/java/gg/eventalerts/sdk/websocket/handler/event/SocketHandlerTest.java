@@ -4,7 +4,9 @@ import com.google.gson.JsonObject;
 import gg.eventalerts.sdk.json.GSONProvider;
 import gg.eventalerts.sdk.object.Event;
 import gg.eventalerts.sdk.support.JsonRoundTripSupport;
-import gg.eventalerts.sdk.websocket.object.event.SocketEvent;
+import gg.eventalerts.sdk.websocket.handler.EventPostedHandler;
+import gg.eventalerts.sdk.websocket.SocketEventName;
+import gg.eventalerts.sdk.websocket.message.event.SocketEvent;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
-class SocketEventHandlerTest {
+class SocketHandlerTest {
     @Test
     void onMessageParsesTheEntireEnvelope() {
         final CapturingHandler handler = new CapturingHandler();
@@ -43,7 +45,7 @@ class SocketEventHandlerTest {
         assertEquals(payload.title, parsed.data.title);
     }
 
-    private static final class CapturingHandler extends EventPostedEventHandler {
+    private static final class CapturingHandler extends EventPostedHandler {
         private final AtomicReference<SocketEvent<Event>> captured = new AtomicReference<>();
 
         @Override

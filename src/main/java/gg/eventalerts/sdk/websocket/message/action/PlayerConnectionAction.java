@@ -1,4 +1,4 @@
-package gg.eventalerts.sdk.websocket.object.action;
+package gg.eventalerts.sdk.websocket.message.action;
 
 import gg.eventalerts.sdk.ExampleUtility;
 import gg.eventalerts.sdk.object.EAObject;

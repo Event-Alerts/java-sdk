@@ -1,17 +1,18 @@
-package gg.eventalerts.sdk.websocket.handler.event;
+package gg.eventalerts.sdk.websocket.handler;
 
 import gg.eventalerts.sdk.object.PartnerServer;
+import gg.eventalerts.sdk.websocket.SocketEventName;
 import org.jetbrains.annotations.NotNull;
 
 
-public abstract class ServerEditedEventHandler extends SocketEventHandler<PartnerServer> {
+public abstract class ServerEditedHandler extends SocketHandler<PartnerServer> {
     @Override @NotNull
     public SocketEventName getName() {
         return SocketEventName.SERVER_EDITED;
     }
 
     @Override @NotNull
-    public Class<PartnerServer> getDataType() {
+    public Class<PartnerServer> getObjectType() {
         return PartnerServer.class;
     }
 }

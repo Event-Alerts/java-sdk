@@ -7,13 +7,13 @@ import gg.eventalerts.sdk.object.FamousEvent;
 import gg.eventalerts.sdk.object.Player;
 import gg.eventalerts.sdk.object.ServerApplication;
 import gg.eventalerts.sdk.support.JsonRoundTripSupport;
-import gg.eventalerts.sdk.websocket.handler.action.SocketActionName;
-import gg.eventalerts.sdk.websocket.handler.event.SocketEventName;
-import gg.eventalerts.sdk.websocket.object.action.PlayerConnectionAction;
-import gg.eventalerts.sdk.websocket.object.action.SocketAction;
-import gg.eventalerts.sdk.websocket.object.event.CrossBanEvent;
-import gg.eventalerts.sdk.websocket.object.event.LinkEvent;
-import gg.eventalerts.sdk.websocket.object.event.SocketEvent;
+import gg.eventalerts.sdk.websocket.SocketActionName;
+import gg.eventalerts.sdk.websocket.SocketEventName;
+import gg.eventalerts.sdk.websocket.message.action.PlayerConnectionAction;
+import gg.eventalerts.sdk.websocket.message.action.SocketAction;
+import gg.eventalerts.sdk.websocket.message.event.CrossBanEvent;
+import gg.eventalerts.sdk.websocket.message.event.LinkEvent;
+import gg.eventalerts.sdk.websocket.message.event.SocketEvent;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
@@ -147,7 +147,6 @@ class AdditionalModelRoundTripTest {
         final SocketEvent<Player> eventEnvelope = new SocketEvent<>(
                 SocketEventName.LINK,
                 7,
-                new Date(1_700_000_000_123L),
                 player);
         final SocketAction<PlayerConnectionAction> actionEnvelope = new SocketAction<>(
                 SocketActionName.PLAYER_CONNECTION,

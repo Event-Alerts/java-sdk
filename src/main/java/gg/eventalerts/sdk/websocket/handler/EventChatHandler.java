@@ -1,17 +1,18 @@
-package gg.eventalerts.sdk.websocket.handler.event;
+package gg.eventalerts.sdk.websocket.handler;
 
 import gg.eventalerts.sdk.object.EventThreadMessage;
+import gg.eventalerts.sdk.websocket.SocketEventName;
 import org.jetbrains.annotations.NotNull;
 
 
-public abstract class EventChatEventHandler extends SocketEventHandler<EventThreadMessage> {
+public abstract class EventChatHandler extends SocketHandler<EventThreadMessage> {
     @Override @NotNull
     public SocketEventName getName() {
         return SocketEventName.EVENT_CHAT;
     }
 
     @Override @NotNull
-    public Class<EventThreadMessage> getDataType() {
+    public Class<EventThreadMessage> getObjectType() {
         return EventThreadMessage.class;
     }
 }

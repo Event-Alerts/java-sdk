@@ -1,7 +1,7 @@
-package gg.eventalerts.sdk.websocket.object.action;
+package gg.eventalerts.sdk.websocket.message.action;
 
 import gg.eventalerts.sdk.object.EAObject;
-import gg.eventalerts.sdk.websocket.handler.event.SocketEventName;
+import gg.eventalerts.sdk.websocket.SocketEventName;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

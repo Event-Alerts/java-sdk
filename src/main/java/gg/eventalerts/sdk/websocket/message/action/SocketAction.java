@@ -1,19 +1,19 @@
-package gg.eventalerts.sdk.websocket.object.action;
+package gg.eventalerts.sdk.websocket.message.action;
 
 import gg.eventalerts.sdk.object.EAObject;
-import gg.eventalerts.sdk.websocket.handler.action.SocketActionName;
+import gg.eventalerts.sdk.websocket.SocketActionName;
+import gg.eventalerts.sdk.websocket.message.SocketMessage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 
-public class SocketAction<T extends EAObject> extends EAObject {
+public class SocketAction<T extends EAObject> extends SocketMessage<T> {
     @Nullable public SocketActionName action;
-    @Nullable public T data;
 
     public SocketAction() {}
 
     public SocketAction(@NotNull SocketActionName action, @NotNull T data) {
+        super(data);
         this.action = action;
-        this.data = data;
     }
 }

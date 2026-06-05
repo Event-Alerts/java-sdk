@@ -4,11 +4,11 @@ import gg.eventalerts.sdk.object.Event;
 import gg.eventalerts.sdk.object.PartnerServer;
 import gg.eventalerts.sdk.object.Player;
 import gg.eventalerts.sdk.support.JsonRoundTripSupport;
-import gg.eventalerts.sdk.websocket.handler.action.SocketActionName;
-import gg.eventalerts.sdk.websocket.handler.event.SocketEventName;
-import gg.eventalerts.sdk.websocket.object.action.SocketAction;
-import gg.eventalerts.sdk.websocket.object.action.UpdateSubscriptionAction;
-import gg.eventalerts.sdk.websocket.object.event.SocketEvent;
+import gg.eventalerts.sdk.websocket.SocketActionName;
+import gg.eventalerts.sdk.websocket.SocketEventName;
+import gg.eventalerts.sdk.websocket.message.action.SocketAction;
+import gg.eventalerts.sdk.websocket.message.action.UpdateSubscriptionAction;
+import gg.eventalerts.sdk.websocket.message.event.SocketEvent;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
 

@@ -2,16 +2,12 @@ package gg.eventalerts.sdk.websocket;
 
 import gg.eventalerts.sdk.object.Event;
 import gg.eventalerts.sdk.object.EventThreadMessage;
+import gg.eventalerts.sdk.websocket.handler.EventChatHandler;
+import gg.eventalerts.sdk.websocket.handler.EventPostedHandler;
 import gg.eventalerts.sdk.websocket.handler.SocketHandler;
-import gg.eventalerts.sdk.websocket.handler.action.PlayerConnectionActionHandler;
-import gg.eventalerts.sdk.websocket.handler.action.SocketActionName;
-import gg.eventalerts.sdk.websocket.handler.action.UpdateSubscriptionActionHandler;
-import gg.eventalerts.sdk.websocket.handler.event.EventChatEventHandler;
-import gg.eventalerts.sdk.websocket.handler.event.EventPostedEventHandler;
-import gg.eventalerts.sdk.websocket.handler.event.SocketEventName;
-import gg.eventalerts.sdk.websocket.object.action.PlayerConnectionAction;
-import gg.eventalerts.sdk.websocket.object.action.UpdateSubscriptionAction;
-import gg.eventalerts.sdk.websocket.object.event.SocketEvent;
+import gg.eventalerts.sdk.websocket.message.action.PlayerConnectionAction;
+import gg.eventalerts.sdk.websocket.message.action.UpdateSubscriptionAction;
+import gg.eventalerts.sdk.websocket.message.event.SocketEvent;
 import gg.eventalerts.sdk.websocket.support.WebSocketFixtureServer;
 import org.java_websocket.handshake.ClientHandshake;
 import org.jspecify.annotations.NonNull;
@@ -62,8 +58,8 @@ class EAWebSocketIntegrationTest {
     @Test
     @Timeout(10)
     void connectsAndDispatchesTypedSocketEvent() throws Exception {
-        final CapturingEventHandler handler = new CapturingEventHandler();
-        final EAWebSocket socket = newSocket(new UpdateSubscriptionActionHandler(), handler);
+        final CapturingHandler handler = new CapturingHandler();
+        final EAWebSocket socket = newSocket(handler);
 
         assertTrue(socket.connectBlocking(5, TimeUnit.SECONDS));
         assertTrue(server.awaitMessageCount(1, 5, TimeUnit.SECONDS));
@@ -89,14 +85,14 @@ class EAWebSocketIntegrationTest {
     @Test
     @Timeout(10)
     void connectsWithHeadersAndFiltersSubscriptions() throws Exception {
-        final CapturingEventHandler enabledHandler = new CapturingEventHandler();
+        final CapturingHandler enabledHandler = new CapturingHandler();
         final NeverSubscribesHandler disabledHandler = new NeverSubscribesHandler();
         final EAWebSocket socket = new EAWebSocket.Builder(SOCKET_URI, "gg.eventalerts.sdk-test/1.0")
                 .retry(false)
                 .bearerToken("bearer-123")
                 .playerKey("player-456")
                 .serverKey("server-789")
-                .addHandlers(new UpdateSubscriptionActionHandler(), enabledHandler, disabledHandler)
+                .handler(enabledHandler, disabledHandler)
                 .build();
 
         assertTrue(socket.connectBlocking(5, TimeUnit.SECONDS));
@@ -122,7 +118,7 @@ class EAWebSocketIntegrationTest {
     @Test
     @Timeout(10)
     void subscribeAndUnsubscribeSendExplicitActionMessages() throws Exception {
-        final EAWebSocket socket = newSocket(new UpdateSubscriptionActionHandler());
+        final EAWebSocket socket = newSocket();
 
         assertTrue(socket.connectBlocking(5, TimeUnit.SECONDS));
         assertTrue(server.awaitMessageCount(1, 5, TimeUnit.SECONDS));
@@ -156,7 +152,6 @@ class EAWebSocketIntegrationTest {
     void sendsPlayerConnectionActionPayload() throws Exception {
         final EAWebSocket socket = new EAWebSocket.Builder(SOCKET_URI, "gg.eventalerts.sdk-test/1.0")
                 .retry(false)
-                .addHandlers(new UpdateSubscriptionActionHandler(), new PlayerConnectionActionHandler())
                 .build();
 
         assertTrue(socket.connectBlocking(5, TimeUnit.SECONDS));
@@ -184,11 +179,11 @@ class EAWebSocketIntegrationTest {
     private static EAWebSocket newSocket(SocketHandler<?>... handlers) {
         return new EAWebSocket.Builder(SOCKET_URI, "gg.eventalerts.sdk-test/1.0")
                 .retry(false)
-                .addHandlers(handlers)
+                .handler(handlers)
                 .build();
     }
 
-    private static final class CapturingEventHandler extends EventPostedEventHandler {
+    private static final class CapturingHandler extends EventPostedHandler {
         private final CountDownLatch received = new CountDownLatch(1);
         private final AtomicReference<SocketEvent<Event>> captured = new AtomicReference<>();
 
@@ -199,7 +194,7 @@ class EAWebSocketIntegrationTest {
         }
     }
 
-    private static final class NeverSubscribesHandler extends EventChatEventHandler {
+    private static final class NeverSubscribesHandler extends EventChatHandler {
         @Override
         public boolean shouldSubscribe() {
             return false;
