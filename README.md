@@ -51,17 +51,15 @@ void main() {
                     URI.create("ws://localhost:9090/api/v1/socket"),
                     "EventAlertsExample/1.0") // User-Agent
             .retry(false) // Disable automatic reconnects
-            .addHandlers(
-                    new EventPostedEventHandler() {
-                        @Override
-                        public void onMessage(@NotNull SocketEvent<Event> object) {
-                            System.out.println("Received: " + object.event);
-                            System.out.println("Sequence: " + object.sequence);
-                            System.out.println("Timestamp: " + object.timestamp);
-                            System.out.println("Title: " + object.data.title);
-                        }
-                    },
-                    new PlayerConnectionActionHandler())
+            .handler(new EventPostedEventHandler() {
+                @Override
+                public void onMessage(@NotNull SocketEvent<Event> object) {
+                    System.out.println("Received: " + object.event);
+                    System.out.println("Sequence: " + object.sequence);
+                    System.out.println("Timestamp: " + object.timestamp);
+                    System.out.println("Title: " + object.data.title);
+                }
+            })
             .build();
     socket.connectBlocking();
     socket.send(SocketActionName.PLAYER_CONNECTION, PlayerConnectionAction.getExample());
@@ -94,10 +92,7 @@ Contains the websocket client and the typed socket envelope classes.
 
 ### Handlers
 
-Handlers are split into event handlers and action handlers.
-
-- Event handlers extend `SocketEventHandler<T>` and receive a typed `SocketEvent<T>`
-- Action handlers extend `SocketActionHandler` and declare which outgoing action they support
+Event handlers extend `SocketEventHandler<T>` and receive a typed `SocketEvent<T>`
 
 Built-in event names:
 
@@ -110,6 +105,10 @@ Built-in event names:
 - `LINK`
 - `SERVER_EDITED`
 - `SERVER_ENABLED`
+
+### Actions
+
+Action names are sent directly through `EAWebSocket.send(...)` using `SocketActionName` values
 
 Built-in action names:
 
@@ -161,7 +160,9 @@ Example:
 ## Typical Flow
 
 - Serialize or deserialize API models through `GSONProvider.GSON`
-- Subclass a built-in event or action handler when you need custom websocket behavior
-- Add handlers to `EAWebSocket.Builder`
-- Connect with `build()` + `connectBlocking()` or `buildThenConnect()`
-- Use `send(...)`, `subscribe(...)`, or `unsubscribe(...)` when you need to push actions
+- Subclass a built-in event handler when you need custom websocket behavior
+- Add event handlers to `EAWebSocket.Builder`
+- Connect with `build()` + `connect()` or `buildThenConnect()`
+- Use `subscribe(...)` and `unsubscribe(...)` to update subscriptions manually
+  - Or use `updateSubscriptions()` to automatically update based on `SocketHandler.shouldSubscribe(...)`
+- Use `send(...)` when you need to push actions
