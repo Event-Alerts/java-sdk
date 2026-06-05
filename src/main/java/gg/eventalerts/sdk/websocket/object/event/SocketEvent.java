@@ -10,15 +10,15 @@ import java.util.Date;
 
 public class SocketEvent<T extends EAObject> extends EAObject {
     @Nullable public SocketEventName event;
-    @Nullable public Integer messagesSent;
+    @Nullable public Integer sequence;
     @Nullable public Date timestamp;
     @Nullable public T data;
 
     public SocketEvent() {}
 
-    public SocketEvent(@NotNull SocketEventName event, int messagesSent, @NotNull Date timestamp, @NotNull T data) {
+    public SocketEvent(@NotNull SocketEventName event, int sequence, @NotNull Date timestamp, @NotNull T data) {
         this.event = event;
-        this.messagesSent = messagesSent;
+        this.sequence = sequence;
         this.timestamp = timestamp;
         this.data = data;
     }
