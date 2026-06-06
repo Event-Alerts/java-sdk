@@ -19,7 +19,7 @@ public class EnumAdapter implements TypeAdapterFactory {
         final Class<? super T> rawType = type.getRawType();
         if (rawType == Enum.class || !Enum.class.isAssignableFrom(rawType)) return null;
 
-        return new TypeAdapter<>() {
+        return new TypeAdapter<T>() {
             @Override
             public void write(@NotNull JsonWriter out, @Nullable T value) throws IOException {
                 if (value == null) {

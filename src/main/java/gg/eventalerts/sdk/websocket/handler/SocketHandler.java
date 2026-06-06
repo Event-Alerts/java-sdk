@@ -16,7 +16,7 @@ public abstract class SocketHandler<O extends EAObject> {
     public abstract SocketEventName getName();
 
     @NotNull
-    public abstract Class<O> getObjectType();
+    public abstract Class<O> getObjectClass();
 
     public boolean shouldSubscribe() {
         return true;
@@ -25,7 +25,7 @@ public abstract class SocketHandler<O extends EAObject> {
     public abstract void onMessage(@NotNull SocketEvent<O> object);
 
     public final void onMessage(@NotNull JsonObject json) {
-        final Type type = TypeToken.getParameterized(SocketEvent.class, getObjectType()).getType();
+        final Type type = TypeToken.getParameterized(SocketEvent.class, getObjectClass()).getType();
         final SocketEvent<O> event = GSONProvider.GSON.fromJson(json, type);
         if (event != null) onMessage(event);
     }

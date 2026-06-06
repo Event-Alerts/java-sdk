@@ -5,8 +5,13 @@ import org.jetbrains.annotations.NotNull;
 
 
 public abstract class EAObject {
+    @NotNull
+    public String toJson() {
+        return GSONProvider.GSON.toJson(this);
+    }
+
     @Override @NotNull
     public String toString() {
-        return GSONProvider.GSON.toJson(this);
+        return toJson();
     }
 }

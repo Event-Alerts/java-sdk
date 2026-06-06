@@ -1,22 +1,22 @@
 package gg.eventalerts.sdk.websocket.message.event;
 
-import gg.eventalerts.sdk.object.CrossBan;
+import gg.eventalerts.sdk.object.EACrossBan;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 
-public class CrossBanEvent extends CrossBan {
+public class EACrossBanEvent extends EACrossBan {
     @Nullable public Status status;
 
-    public CrossBanEvent(@NotNull CrossBan crossBan, @Nullable Status status) {
+    public EACrossBanEvent(@NotNull EACrossBan crossBan, @Nullable Status status) {
         super(crossBan);
         this.status = status;
     }
 
     @NotNull
-    public static CrossBanEvent getExample() {
-        return new CrossBanEvent(
-                CrossBan.getExample(),
+    public static EACrossBanEvent getExample() {
+        return new EACrossBanEvent(
+                EACrossBan.getExample(),
                 Status.ADDED);
     }
 

@@ -1,24 +1,24 @@
 package gg.eventalerts.sdk.json;
 
-import gg.eventalerts.sdk.object.CrossBan;
-import gg.eventalerts.sdk.object.Event;
-import gg.eventalerts.sdk.object.EventThreadMessage;
-import gg.eventalerts.sdk.object.FamousEvent;
-import gg.eventalerts.sdk.object.Player;
-import gg.eventalerts.sdk.object.ServerApplication;
+import gg.eventalerts.sdk.object.EACrossBan;
+import gg.eventalerts.sdk.object.EAEvent;
+import gg.eventalerts.sdk.object.EAEventThreadMessage;
+import gg.eventalerts.sdk.object.EAFamousEvent;
+import gg.eventalerts.sdk.object.EAPlayer;
+import gg.eventalerts.sdk.object.EAServerApplication;
 import gg.eventalerts.sdk.support.JsonRoundTripSupport;
 import gg.eventalerts.sdk.websocket.SocketActionName;
 import gg.eventalerts.sdk.websocket.SocketEventName;
-import gg.eventalerts.sdk.websocket.message.action.PlayerConnectionAction;
+import gg.eventalerts.sdk.websocket.message.action.EAPlayerConnectionAction;
 import gg.eventalerts.sdk.websocket.message.action.SocketAction;
-import gg.eventalerts.sdk.websocket.message.event.CrossBanEvent;
-import gg.eventalerts.sdk.websocket.message.event.LinkEvent;
+import gg.eventalerts.sdk.websocket.message.event.EACrossBanEvent;
+import gg.eventalerts.sdk.websocket.message.event.EALinkEvent;
 import gg.eventalerts.sdk.websocket.message.event.SocketEvent;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
+import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -28,8 +28,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class AdditionalModelRoundTripTest {
     @Test
     void crossBanRoundTripPreservesFields() {
-        final CrossBan original = CrossBan.getExample();
-        final CrossBan parsed = JsonRoundTripSupport.roundTrip(original, CrossBan.class);
+        final EACrossBan original = EACrossBan.getExample();
+        final EACrossBan parsed = JsonRoundTripSupport.roundTrip(original, EACrossBan.class);
 
         assertNotNull(parsed);
         assertEquals(original.id, parsed.id);
@@ -42,8 +42,8 @@ class AdditionalModelRoundTripTest {
 
     @Test
     void famousEventRoundTripPreservesFields() {
-        final FamousEvent original = FamousEvent.getExample();
-        final FamousEvent parsed = JsonRoundTripSupport.roundTrip(original, FamousEvent.class);
+        final EAFamousEvent original = EAFamousEvent.getExample();
+        final EAFamousEvent parsed = JsonRoundTripSupport.roundTrip(original, EAFamousEvent.class);
 
         assertNotNull(parsed);
         assertEquals(original.type, parsed.type);
@@ -54,8 +54,8 @@ class AdditionalModelRoundTripTest {
 
     @Test
     void serverApplicationRoundTripPreservesNestedData() {
-        final ServerApplication original = ServerApplication.getExample();
-        final ServerApplication parsed = JsonRoundTripSupport.roundTrip(original, ServerApplication.class);
+        final EAServerApplication original = EAServerApplication.getExample();
+        final EAServerApplication parsed = JsonRoundTripSupport.roundTrip(original, EAServerApplication.class);
 
         assertNotNull(parsed);
         assertEquals(original.id, parsed.id);
@@ -74,25 +74,25 @@ class AdditionalModelRoundTripTest {
 
     @Test
     void eventThreadMessageRoundTripPreservesDeeplyNestedObjects() {
-        final Event event = Event.getExample();
-        final EventThreadMessage original = new EventThreadMessage(
+        final EAEvent event = EAEvent.getExample();
+        final EAEventThreadMessage original = new EAEventThreadMessage(
                 event,
-                new EventThreadMessage.Channel("123", "event-thread"),
-                new EventThreadMessage.Author(
-                        "456",
+                new EAEventThreadMessage.Channel(123, "event-thread"),
+                new EAEventThreadMessage.Author(
+                        456,
                         "tester",
                         "Tester",
-                        Player.getExample()),
-                new EventThreadMessage.Message(
-                        "789",
-                        new EventThreadMessage.Message.Content("raw", "display", "stripped"),
-                        List.of(new EventThreadMessage.Message.Attachment(
-                                "att-1",
+                        EAPlayer.getExample()),
+                new EAEventThreadMessage.Message(
+                        789,
+                        new EAEventThreadMessage.Message.Content("raw", "display", "stripped"),
+                        Collections.singletonList(new EAEventThreadMessage.Message.Attachment(
+                                321,
                                 "file.png",
                                 "https://example.invalid/file.png",
                                 "https://proxy.invalid/file.png"))));
 
-        final EventThreadMessage parsed = JsonRoundTripSupport.roundTrip(original, EventThreadMessage.class);
+        final EAEventThreadMessage parsed = JsonRoundTripSupport.roundTrip(original, EAEventThreadMessage.class);
 
         assertNotNull(parsed);
         assertNotNull(parsed.event);
@@ -126,41 +126,41 @@ class AdditionalModelRoundTripTest {
 
     @Test
     void linkAndCrossBanEventRoundTripPreserveWrapperFields() {
-        final LinkEvent linkEvent = JsonRoundTripSupport.roundTrip(LinkEvent.getExample(), LinkEvent.class);
-        final CrossBanEvent crossBanEvent = JsonRoundTripSupport.roundTrip(CrossBanEvent.getExample(), CrossBanEvent.class);
+        final EALinkEvent linkEvent = JsonRoundTripSupport.roundTrip(EALinkEvent.getExample(), EALinkEvent.class);
+        final EACrossBanEvent crossBanEvent = JsonRoundTripSupport.roundTrip(EACrossBanEvent.getExample(), EACrossBanEvent.class);
 
         assertNotNull(linkEvent);
-        assertEquals(LinkEvent.LinkStatus.ADDED, linkEvent.linkStatus);
+        assertEquals(EALinkEvent.LinkStatus.ADDED, linkEvent.linkStatus);
         assertNotNull(linkEvent.discord);
-        assertNotNull(Player.getExample().discord);
-        assertEquals(Player.getExample().discord.id, linkEvent.discord.id);
+        assertNotNull(EAPlayer.getExample().discord);
+        assertEquals(EAPlayer.getExample().discord.id, linkEvent.discord.id);
 
         assertNotNull(crossBanEvent);
-        assertEquals(CrossBanEvent.Status.ADDED, crossBanEvent.status);
-        assertEquals(CrossBan.getExample().reason, crossBanEvent.reason);
+        assertEquals(EACrossBanEvent.Status.ADDED, crossBanEvent.status);
+        assertEquals(EACrossBan.getExample().reason, crossBanEvent.reason);
     }
 
     @Test
     void socketEnvelopeAndActionRoundTripWithSubtypePayloads() {
-        final Player player = Player.getExample();
+        final EAPlayer player = EAPlayer.getExample();
 
-        final SocketEvent<Player> eventEnvelope = new SocketEvent<>(
+        final SocketEvent<EAPlayer> eventEnvelope = new SocketEvent<>(
                 SocketEventName.LINK,
                 7,
                 player);
-        final SocketAction<PlayerConnectionAction> actionEnvelope = new SocketAction<>(
+        final SocketAction<EAPlayerConnectionAction> actionEnvelope = new SocketAction<>(
                 SocketActionName.PLAYER_CONNECTION,
-                new PlayerConnectionAction(
+                new EAPlayerConnectionAction(
                         UUID.fromString("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"),
                         "tester",
                         new Date(1_700_000_000_123L),
-                        PlayerConnectionAction.Type.JOIN));
+                        EAPlayerConnectionAction.Type.JOIN));
 
-        final Type eventType = JsonRoundTripSupport.typeOf(SocketEvent.class, Player.class);
-        final Type actionType = JsonRoundTripSupport.typeOf(SocketAction.class, PlayerConnectionAction.class);
+        final Type eventType = JsonRoundTripSupport.typeOf(SocketEvent.class, EAPlayer.class);
+        final Type actionType = JsonRoundTripSupport.typeOf(SocketAction.class, EAPlayerConnectionAction.class);
 
-        final SocketEvent<Player> parsedEvent = JsonRoundTripSupport.roundTrip(eventEnvelope, eventType);
-        final SocketAction<PlayerConnectionAction> parsedAction = JsonRoundTripSupport.roundTrip(actionEnvelope, actionType);
+        final SocketEvent<EAPlayer> parsedEvent = JsonRoundTripSupport.roundTrip(eventEnvelope, eventType);
+        final SocketAction<EAPlayerConnectionAction> parsedAction = JsonRoundTripSupport.roundTrip(actionEnvelope, actionType);
 
         assertNotNull(parsedEvent);
         assertEquals(eventEnvelope.event, parsedEvent.event);

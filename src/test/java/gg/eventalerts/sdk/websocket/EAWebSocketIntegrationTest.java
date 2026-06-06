@@ -1,16 +1,16 @@
 package gg.eventalerts.sdk.websocket;
 
-import gg.eventalerts.sdk.object.Event;
-import gg.eventalerts.sdk.object.EventThreadMessage;
+import gg.eventalerts.sdk.object.EAEvent;
+import gg.eventalerts.sdk.object.EAEventThreadMessage;
 import gg.eventalerts.sdk.websocket.handler.EventChatHandler;
 import gg.eventalerts.sdk.websocket.handler.EventPostedHandler;
 import gg.eventalerts.sdk.websocket.handler.SocketHandler;
-import gg.eventalerts.sdk.websocket.message.action.PlayerConnectionAction;
-import gg.eventalerts.sdk.websocket.message.action.UpdateSubscriptionAction;
+import gg.eventalerts.sdk.websocket.message.action.EAPlayerConnectionAction;
+import gg.eventalerts.sdk.websocket.message.action.EAUpdateSubscriptionAction;
 import gg.eventalerts.sdk.websocket.message.event.SocketEvent;
 import gg.eventalerts.sdk.websocket.support.WebSocketFixtureServer;
 import org.java_websocket.handshake.ClientHandshake;
-import org.jspecify.annotations.NonNull;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,9 +18,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
 import java.net.InetSocketAddress;
-import java.net.URI;
+import java.util.Collections;
 import java.util.Date;
-import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -34,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class EAWebSocketIntegrationTest {
     private static final int PORT = 2020;
-    private static final URI SOCKET_URI = URI.create("ws://localhost:" + PORT + "/api/v1/socket");
+    private static final String SOCKET_URL = "ws://localhost:" + PORT + "/api/v1/socket";
 
     private static WebSocketFixtureServer server;
 
@@ -65,12 +64,12 @@ class EAWebSocketIntegrationTest {
         assertTrue(server.awaitMessageCount(1, 5, TimeUnit.SECONDS));
         assertTrue(handler.received.await(5, TimeUnit.SECONDS));
 
-        final UpdateSubscriptionAction subscription = server.parseAction(0).data;
+        final EAUpdateSubscriptionAction subscription = server.parseAction(0).data;
         assertNotNull(subscription);
-        assertEquals(Set.of(SocketEventName.EVENT_POSTED), subscription.getSubscribe());
-        assertEquals(Set.of(), subscription.getUnsubscribe());
+        assertEquals(Collections.singleton(SocketEventName.EVENT_POSTED), subscription.getSubscribe());
+        assertEquals(Collections.emptySet(), subscription.getUnsubscribe());
 
-        final SocketEvent<Event> event = handler.captured.get();
+        final SocketEvent<EAEvent> event = handler.captured.get();
         assertNotNull(event);
         assertEquals(SocketEventName.EVENT_POSTED, event.event);
         assertEquals(Integer.valueOf(3), event.sequence);
@@ -87,7 +86,8 @@ class EAWebSocketIntegrationTest {
     void connectsWithHeadersAndFiltersSubscriptions() throws Exception {
         final CapturingHandler enabledHandler = new CapturingHandler();
         final NeverSubscribesHandler disabledHandler = new NeverSubscribesHandler();
-        final EAWebSocket socket = new EAWebSocket.Builder(SOCKET_URI, "gg.eventalerts.sdk-test/1.0")
+        final EAWebSocket socket = new EAWebSocket.Builder("gg.eventalerts.sdk-test/1.0")
+                .url(SOCKET_URL)
                 .retry(false)
                 .bearerToken("bearer-123")
                 .playerKey("player-456")
@@ -107,10 +107,10 @@ class EAWebSocketIntegrationTest {
         assertEquals("server-789", handshake.getFieldValue("X-Server-Key"));
         assertNull(server.failure());
 
-        final UpdateSubscriptionAction subscription = server.parseAction(0).data;
+        final EAUpdateSubscriptionAction subscription = server.parseAction(0).data;
         assertNotNull(subscription);
-        assertEquals(Set.of(SocketEventName.EVENT_POSTED), subscription.getSubscribe());
-        assertEquals(Set.of(SocketEventName.EVENT_CHAT), subscription.getUnsubscribe());
+        assertEquals(Collections.singleton(SocketEventName.EVENT_POSTED), subscription.getSubscribe());
+        assertEquals(Collections.singleton(SocketEventName.EVENT_CHAT), subscription.getUnsubscribe());
 
         socket.closeBlocking();
     }
@@ -128,21 +128,21 @@ class EAWebSocketIntegrationTest {
 
         assertTrue(server.awaitMessageCount(3, 5, TimeUnit.SECONDS));
 
-        final UpdateSubscriptionAction initial = server.parseAction(0).data;
-        final UpdateSubscriptionAction subscribe = server.parseAction(1).data;
-        final UpdateSubscriptionAction unsubscribe = server.parseAction(2).data;
+        final EAUpdateSubscriptionAction initial = server.parseAction(0).data;
+        final EAUpdateSubscriptionAction subscribe = server.parseAction(1).data;
+        final EAUpdateSubscriptionAction unsubscribe = server.parseAction(2).data;
 
         assertNotNull(initial);
-        assertEquals(Set.of(), initial.getSubscribe());
-        assertEquals(Set.of(), initial.getUnsubscribe());
+        assertEquals(Collections.emptySet(), initial.getSubscribe());
+        assertEquals(Collections.emptySet(), initial.getUnsubscribe());
 
         assertNotNull(subscribe);
-        assertEquals(Set.of(SocketEventName.LINK), subscribe.getSubscribe());
-        assertEquals(Set.of(), subscribe.getUnsubscribe());
+        assertEquals(Collections.singleton(SocketEventName.LINK), subscribe.getSubscribe());
+        assertEquals(Collections.emptySet(), subscribe.getUnsubscribe());
 
         assertNotNull(unsubscribe);
-        assertEquals(Set.of(), unsubscribe.getSubscribe());
-        assertEquals(Set.of(SocketEventName.EVENT_CANCELLED), unsubscribe.getUnsubscribe());
+        assertEquals(Collections.emptySet(), unsubscribe.getSubscribe());
+        assertEquals(Collections.singleton(SocketEventName.EVENT_CANCELLED), unsubscribe.getUnsubscribe());
 
         socket.closeBlocking();
     }
@@ -150,23 +150,24 @@ class EAWebSocketIntegrationTest {
     @Test
     @Timeout(10)
     void sendsPlayerConnectionActionPayload() throws Exception {
-        final EAWebSocket socket = new EAWebSocket.Builder(SOCKET_URI, "gg.eventalerts.sdk-test/1.0")
+        final EAWebSocket socket = new EAWebSocket.Builder("gg.eventalerts.sdk-test/1.0")
+                .url(SOCKET_URL)
                 .retry(false)
                 .build();
 
         assertTrue(socket.connectBlocking(5, TimeUnit.SECONDS));
         assertTrue(server.awaitMessageCount(1, 5, TimeUnit.SECONDS));
 
-        final PlayerConnectionAction action = new PlayerConnectionAction(
+        final EAPlayerConnectionAction action = new EAPlayerConnectionAction(
                 UUID.fromString("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"),
                 "tester",
                 new Date(1_700_000_000_123L),
-                PlayerConnectionAction.Type.JOIN);
+                EAPlayerConnectionAction.Type.JOIN);
         socket.send(SocketActionName.PLAYER_CONNECTION, action);
 
         assertTrue(server.awaitMessageCount(2, 5, TimeUnit.SECONDS));
 
-        final PlayerConnectionAction sent = server.parsePlayerConnectionAction(1).data;
+        final EAPlayerConnectionAction sent = server.parsePlayerConnectionAction(1).data;
         assertNotNull(sent);
         assertEquals(action.uuid, sent.uuid);
         assertEquals(action.username, sent.username);
@@ -177,7 +178,8 @@ class EAWebSocketIntegrationTest {
     }
 
     private static EAWebSocket newSocket(SocketHandler<?>... handlers) {
-        return new EAWebSocket.Builder(SOCKET_URI, "gg.eventalerts.sdk-test/1.0")
+        return new EAWebSocket.Builder("gg.eventalerts.sdk-test/1.0")
+                .url(SOCKET_URL)
                 .retry(false)
                 .handler(handlers)
                 .build();
@@ -185,10 +187,10 @@ class EAWebSocketIntegrationTest {
 
     private static final class CapturingHandler extends EventPostedHandler {
         private final CountDownLatch received = new CountDownLatch(1);
-        private final AtomicReference<SocketEvent<Event>> captured = new AtomicReference<>();
+        private final AtomicReference<SocketEvent<EAEvent>> captured = new AtomicReference<>();
 
         @Override
-        public void onMessage(@NonNull SocketEvent<Event> object) {
+        public void onMessage(@NotNull SocketEvent<EAEvent> object) {
             captured.set(object);
             received.countDown();
         }
@@ -201,6 +203,6 @@ class EAWebSocketIntegrationTest {
         }
 
         @Override
-        public void onMessage(@NonNull SocketEvent<EventThreadMessage> object) {}
+        public void onMessage(@NotNull SocketEvent<EAEventThreadMessage> object) {}
     }
 }

@@ -5,12 +5,10 @@ import org.bson.types.ObjectId;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 
-public class Player extends EAObject {
+public class EAPlayer extends EAObject {
     @Nullable public ObjectId id;
     @Nullable public Discord discord;
     @Nullable public Minecraft minecraft;
@@ -21,9 +19,9 @@ public class Player extends EAObject {
     @Nullable public Double rating;
     @Nullable public Subscription subscription;
 
-    public Player() {}
+    public EAPlayer() {}
 
-    public Player(@Nullable ObjectId id, @Nullable Discord discord, @Nullable Minecraft minecraft, @Nullable LinkMethod linkMethod, @Nullable Set<Integer> anniversaries, @Nullable Set<Long> boosterPasses, @Nullable ObjectId defaultPreset, @Nullable Double rating, @Nullable Subscription subscription) {
+    public EAPlayer(@Nullable ObjectId id, @Nullable Discord discord, @Nullable Minecraft minecraft, @Nullable LinkMethod linkMethod, @Nullable Set<Integer> anniversaries, @Nullable Set<Long> boosterPasses, @Nullable ObjectId defaultPreset, @Nullable Double rating, @Nullable Subscription subscription) {
         this.id = id;
         this.discord = discord;
         this.minecraft = minecraft;
@@ -35,15 +33,15 @@ public class Player extends EAObject {
         this.subscription = subscription;
     }
 
-    public Player(@NotNull Player player) {
+    public EAPlayer(@NotNull EAPlayer player) {
         this(player.id, player.discord, player.minecraft, player.linkMethod, player.anniversaries, player.boosterPasses, player.defaultPreset, player.rating, player.subscription);
     }
 
     @Override
     public boolean equals(@Nullable Object object) {
         if (this == object) return true;
-        if (!(object instanceof final Player player)) return false;
-        return id != null && id.equals(player.id);
+        if (!(object instanceof EAPlayer)) return false;
+        return id != null && id.equals(((EAPlayer) object).id);
     }
 
     @Override
@@ -53,14 +51,14 @@ public class Player extends EAObject {
     }
 
     @NotNull
-    public static Player getExample() {
-        return new Player(
+    public static EAPlayer getExample() {
+        return new EAPlayer(
                 new ObjectId(),
                 Discord.getExample(),
                 Minecraft.getExample(),
-                Player.LinkMethod.MICROSOFT_OAUTH,
-                Set.of(2024, 2025),
-                Set.of(ExampleUtility.User.OIIINK_ID),
+                EAPlayer.LinkMethod.MICROSOFT_OAUTH,
+                new HashSet<>(Arrays.asList(2024, 2025)),
+                Collections.singleton(ExampleUtility.User.OIIINK_ID),
                 new ObjectId(),
                 4.5,
                 Subscription.getExample());
@@ -78,19 +76,19 @@ public class Player extends EAObject {
     public static class Discord extends EAObject {
         @Nullable public String id;
         @Nullable public String username;
-        @Nullable public Set<Player.Discord.Role> roles;
+        @Nullable public Set<EAPlayer.Discord.Role> roles;
 
         public Discord() {}
 
-        public Discord(long id, @Nullable String username, @Nullable Set<Player.Discord.Role> roles) {
+        public Discord(long id, @Nullable String username, @Nullable Set<EAPlayer.Discord.Role> roles) {
             this.id = String.valueOf(id);
             this.username = username;
             this.roles = roles;
         }
 
         @NotNull
-        public Set<Player.Discord.Role> getRoles() {
-            return roles == null ? Set.of() : roles;
+        public Set<EAPlayer.Discord.Role> getRoles() {
+            return roles == null ? Collections.emptySet() : roles;
         }
 
         @NotNull
@@ -98,7 +96,7 @@ public class Player extends EAObject {
             return new Discord(
                     ExampleUtility.User.SRNYX_ID,
                     "srnyx",
-                    Set.of(Player.Discord.Role.ADMIN, Player.Discord.Role.STAFF));
+                    new HashSet<>(Arrays.asList(EAPlayer.Discord.Role.ADMIN, EAPlayer.Discord.Role.STAFF)));
         }
 
         public enum Role {
@@ -129,26 +127,26 @@ public class Player extends EAObject {
     }
 
     public static class Subscription extends EAObject {
-        @Nullable public Player.Subscription.Tier tier;
+        @Nullable public EAPlayer.Subscription.Tier tier;
         @Nullable public List<Long> servers;
 
         public Subscription() {}
 
-        public Subscription(@NotNull Player.Subscription.Tier tier, @Nullable List<Long> servers) {
+        public Subscription(@NotNull EAPlayer.Subscription.Tier tier, @Nullable List<Long> servers) {
             this.tier = tier;
             this.servers = servers;
         }
 
         @NotNull
         public List<Long> getServers() {
-            return servers == null ? List.of() : servers;
+            return servers == null ? Collections.emptyList() : servers;
         }
 
         @NotNull
         public static Subscription getExample() {
             return new Subscription(
                     Tier.BEE,
-                    List.of(ExampleUtility.Guild.EVENT_ALERTS_ID));
+                    Collections.singletonList(ExampleUtility.Guild.EVENT_ALERTS_ID));
         }
 
         public enum Tier {

@@ -1,24 +1,24 @@
 package gg.eventalerts.sdk.websocket.message.event;
 
-import gg.eventalerts.sdk.object.Player;
+import gg.eventalerts.sdk.object.EAPlayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 
-public class LinkEvent extends Player {
+public class EALinkEvent extends EAPlayer {
     @Nullable public LinkStatus linkStatus;
 
-    public LinkEvent() {}
+    public EALinkEvent() {}
 
-    public LinkEvent(@NotNull Player player, @Nullable LinkStatus linkStatus) {
+    public EALinkEvent(@NotNull EAPlayer player, @Nullable LinkStatus linkStatus) {
         super(player);
         this.linkStatus = linkStatus;
     }
 
     @NotNull
-    public static LinkEvent getExample() {
-        return new LinkEvent(
-                Player.getExample(),
+    public static EALinkEvent getExample() {
+        return new EALinkEvent(
+                EAPlayer.getExample(),
                 LinkStatus.ADDED);
     }
 

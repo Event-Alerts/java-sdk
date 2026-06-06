@@ -6,15 +6,15 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 
-public class EventThreadMessage extends EAObject {
-    @Nullable public Event event;
+public class EAEventThreadMessage extends EAObject {
+    @Nullable public EAEvent event;
     @Nullable public Channel channel;
     @Nullable public Author author;
-    @Nullable public EventThreadMessage.Message message;
+    @Nullable public EAEventThreadMessage.Message message;
 
-    public EventThreadMessage() {}
+    public EAEventThreadMessage() {}
 
-    public EventThreadMessage(@NotNull Event event, @NotNull Channel channel, @NotNull Author author, @NotNull EventThreadMessage.Message message) {
+    public EAEventThreadMessage(@NotNull EAEvent event, @NotNull Channel channel, @NotNull Author author, @NotNull EAEventThreadMessage.Message message) {
         this.event = event;
         this.channel = channel;
         this.author = author;
@@ -22,26 +22,26 @@ public class EventThreadMessage extends EAObject {
     }
 
     public static class Channel extends EAObject{
-        @Nullable public String id;
+        @Nullable public Long id;
         @Nullable public String name;
 
         public Channel() {}
 
-        public Channel(@NotNull String id, @NotNull String name) {
+        public Channel(long id, @NotNull String name) {
             this.id = id;
             this.name = name;
         }
     }
 
     public static class Author extends EAObject {
-        @Nullable public String id;
+        @Nullable public Long id;
         @Nullable public String name;
         @Nullable public String effectiveName;
-        @Nullable public Player player;
+        @Nullable public EAPlayer player;
 
         public Author() {}
 
-        public Author(@NotNull String id, @NotNull String name, @NotNull String effectiveName, @Nullable Player player) {
+        public Author(long id, @NotNull String name, @NotNull String effectiveName, @Nullable EAPlayer player) {
             this.id = id;
             this.name = name;
             this.effectiveName = effectiveName;
@@ -50,13 +50,13 @@ public class EventThreadMessage extends EAObject {
     }
 
     public static class Message extends EAObject {
-        @Nullable public String id;
+        @Nullable public Long id;
         @Nullable public Content content;
         @Nullable public List<Attachment> attachments;
 
         public Message() {}
 
-        public Message(@NotNull String id, @NotNull Content content, @NotNull List<Attachment> attachments) {
+        public Message(long id, @NotNull Content content, @NotNull List<Attachment> attachments) {
             this.id = id;
             this.content = content;
             this.attachments = attachments;
@@ -77,14 +77,14 @@ public class EventThreadMessage extends EAObject {
         }
 
         public static class Attachment extends EAObject {
-            @Nullable public String id;
+            @Nullable public Long id;
             @Nullable public String name;
             @Nullable public String url;
             @Nullable public String proxyUrl;
 
             public Attachment() {}
 
-            public Attachment(@NotNull String id, @NotNull String name, @NotNull String url, @NotNull String proxyUrl) {
+            public Attachment(long id, @NotNull String name, @NotNull String url, @NotNull String proxyUrl) {
                 this.id = id;
                 this.name = name;
                 this.url = url;

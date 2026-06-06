@@ -2,12 +2,12 @@ package gg.eventalerts.sdk.websocket.handler.event;
 
 import com.google.gson.JsonObject;
 import gg.eventalerts.sdk.json.GSONProvider;
-import gg.eventalerts.sdk.object.Event;
+import gg.eventalerts.sdk.object.EAEvent;
 import gg.eventalerts.sdk.support.JsonRoundTripSupport;
 import gg.eventalerts.sdk.websocket.handler.EventPostedHandler;
 import gg.eventalerts.sdk.websocket.SocketEventName;
 import gg.eventalerts.sdk.websocket.message.event.SocketEvent;
-import org.jspecify.annotations.NonNull;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
@@ -21,9 +21,9 @@ class SocketHandlerTest {
     @Test
     void onMessageParsesTheEntireEnvelope() {
         final CapturingHandler handler = new CapturingHandler();
-        final Event payload = Event.getExample();
+        final EAEvent payload = EAEvent.getExample();
 
-        final SocketEvent<Event> envelope = new SocketEvent<>();
+        final SocketEvent<EAEvent> envelope = new SocketEvent<>();
         envelope.event = SocketEventName.EVENT_POSTED;
         envelope.sequence = 9;
         envelope.timestamp = new Date(1_700_000_000_123L);
@@ -31,11 +31,11 @@ class SocketHandlerTest {
 
         final JsonObject json = GSONProvider.GSON.toJsonTree(
                 envelope,
-                JsonRoundTripSupport.typeOf(SocketEvent.class, Event.class)).getAsJsonObject();
+                JsonRoundTripSupport.typeOf(SocketEvent.class, EAEvent.class)).getAsJsonObject();
 
         handler.onMessage(json);
 
-        final SocketEvent<Event> parsed = handler.captured.get();
+        final SocketEvent<EAEvent> parsed = handler.captured.get();
         assertNotNull(parsed);
         assertEquals(SocketEventName.EVENT_POSTED, parsed.event);
         assertEquals(Integer.valueOf(9), parsed.sequence);
@@ -46,10 +46,10 @@ class SocketHandlerTest {
     }
 
     private static final class CapturingHandler extends EventPostedHandler {
-        private final AtomicReference<SocketEvent<Event>> captured = new AtomicReference<>();
+        private final AtomicReference<SocketEvent<EAEvent>> captured = new AtomicReference<>();
 
         @Override
-        public void onMessage(@NonNull SocketEvent<Event> object) {
+        public void onMessage(@NotNull SocketEvent<EAEvent> object) {
             captured.set(object);
         }
     }

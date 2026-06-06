@@ -2,10 +2,11 @@ package gg.eventalerts.sdk.websocket;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import com.google.gson.reflect.TypeToken;
 import gg.eventalerts.sdk.json.GSONProvider;
 import gg.eventalerts.sdk.object.EAObject;
 import gg.eventalerts.sdk.websocket.message.action.SocketAction;
-import gg.eventalerts.sdk.websocket.message.action.UpdateSubscriptionAction;
+import gg.eventalerts.sdk.websocket.message.action.EAUpdateSubscriptionAction;
 import gg.eventalerts.sdk.websocket.handler.SocketHandler;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.framing.CloseFrame;
@@ -45,8 +46,8 @@ public class EAWebSocket extends WebSocketClient {
     @Nullable public Date lastMessageSentAt;
     @Nullable public Date lastMessageReceivedAt;
 
-    private EAWebSocket(@NotNull URI uri, @NotNull String userAgent, @NotNull Set<SocketHandler<?>> handlers, boolean retry, @NotNull Duration retryDelay, @Nullable String bearerToken, @Nullable String playerKey, @Nullable String serverKey, @NotNull Map<String, String> headers) {
-        super(uri, createHeaders(headers, userAgent, bearerToken, playerKey, serverKey));
+    private EAWebSocket(@NotNull String url, @NotNull Map<String, String> headers, @NotNull Set<SocketHandler<?>> handlers, boolean retry, @NotNull Duration retryDelay) {
+        super(URI.create(url), headers);
 
         // Register handlers
         for (final SocketHandler<?> handler : handlers) {
@@ -58,22 +59,12 @@ public class EAWebSocket extends WebSocketClient {
         this.retryDelay = retryDelay;
     }
 
-    @NotNull
-    private static Map<String, String> createHeaders(@NotNull Map<String, String> headers, @NotNull String userAgent, @Nullable String bearerToken, @Nullable String playerKey, @Nullable String serverKey) {
-        final Map<String, String> modifiedHeaders = new HashMap<>(headers);
-        modifiedHeaders.put("User-Agent", userAgent);
-        if (bearerToken != null) modifiedHeaders.put("Authorization", "Bearer " + bearerToken);
-        if (playerKey != null) modifiedHeaders.put("X-Player-Key", playerKey);
-        if (serverKey != null) modifiedHeaders.put("X-Server-Key", serverKey);
-        return modifiedHeaders;
-    }
-
     public void subscribe(@NotNull SocketEventName name) {
-        send(SocketActionName.UPDATE_SUBSCRIPTION, new UpdateSubscriptionAction(Set.of(name), null));
+        send(SocketActionName.UPDATE_SUBSCRIPTION, new EAUpdateSubscriptionAction(Collections.singleton(name), null));
     }
 
     public void unsubscribe(@NotNull SocketEventName name) {
-        send(SocketActionName.UPDATE_SUBSCRIPTION, new UpdateSubscriptionAction(null, Set.of(name)));
+        send(SocketActionName.UPDATE_SUBSCRIPTION, new EAUpdateSubscriptionAction(null, Collections.singleton(name)));
     }
 
     public void updateSubscriptions() {
@@ -89,7 +80,7 @@ public class EAWebSocket extends WebSocketClient {
         }
 
         // Send UPDATE_SUBSCRIPTION
-        send(SocketActionName.UPDATE_SUBSCRIPTION, new UpdateSubscriptionAction(subscribe, unsubscribe));
+        send(SocketActionName.UPDATE_SUBSCRIPTION, new EAUpdateSubscriptionAction(subscribe, unsubscribe));
     }
 
     public void retryConnection(@NotNull String reason) {
@@ -121,6 +112,7 @@ public class EAWebSocket extends WebSocketClient {
     public <T extends EAObject> void afterSend(@NotNull SocketActionName name, @NotNull SocketAction<T> action) {}
 
     public <T extends EAObject> void send(@NotNull SocketActionName name, @NotNull T object) {
+        if (!isOpen()) return;
         final SocketAction<T> action = new SocketAction<>(name, object);
 
         // Should send?
@@ -134,7 +126,7 @@ public class EAWebSocket extends WebSocketClient {
         lastMessageSentAt = new Date();
 
         // Send
-        send(GSONProvider.GSON.toJson(action));
+        send(GSONProvider.GSON.toJson(action, TypeToken.getParameterized(SocketAction.class, name.objectType).getType()));
 
         // After send
         afterSend(name, action);
@@ -207,9 +199,11 @@ public class EAWebSocket extends WebSocketClient {
     }
 
     public static class Builder {
-        @NotNull private final URI uri;
+        // Required
         @NotNull private final String userAgent;
 
+        // Optional
+        @NotNull private String url = "wss://eventalerts.gg/api/v1/socket";
         @NotNull private final Set<SocketHandler<?>> handlers = new HashSet<>();
         private boolean retry = true;
         @NotNull private Duration retryDelay = Duration.ofMinutes(5);
@@ -218,9 +212,14 @@ public class EAWebSocket extends WebSocketClient {
         @Nullable private String serverKey;
         @NotNull private final Map<String, String> headers = new HashMap<>();
 
-        public Builder(@NotNull URI uri, @NotNull String userAgent) {
-            this.uri = uri;
+        public Builder(@NotNull String userAgent) {
             this.userAgent = userAgent;
+        }
+
+        @NotNull
+        public Builder url(@NotNull String url) {
+            this.url = url;
+            return this;
         }
 
         @NotNull
@@ -267,7 +266,17 @@ public class EAWebSocket extends WebSocketClient {
 
         @NotNull
         public EAWebSocket build() {
-            return new EAWebSocket(uri, userAgent, handlers, retry, retryDelay, bearerToken, playerKey, serverKey, headers);
+            // URL
+            if (url.endsWith("/")) url = url.substring(0, url.length() - 1);
+
+            // Headers
+            final Map<String, String> allHeaders = new HashMap<>(headers);
+            allHeaders.put("User-Agent", userAgent);
+            if (bearerToken != null) allHeaders.put("Authorization", "Bearer " + bearerToken);
+            if (playerKey != null) allHeaders.put("X-Player-Key", playerKey);
+            if (serverKey != null) allHeaders.put("X-Server-Key", serverKey);
+
+            return new EAWebSocket(url, allHeaders, handlers, retry, retryDelay);
         }
 
         @NotNull

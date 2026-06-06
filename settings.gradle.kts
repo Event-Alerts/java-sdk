@@ -1,1 +1,1 @@
-rootProject.name = "EventAlertsSDK"
+rootProject.name = "SDK"

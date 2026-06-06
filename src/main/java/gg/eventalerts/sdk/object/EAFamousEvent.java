@@ -5,15 +5,15 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 
-public class FamousEvent extends EAObject {
+public class EAFamousEvent extends EAObject {
     @Nullable public Type type;
     @Nullable public Long channel;
     @Nullable public String message;
     @Nullable public Long user;
 
-    public FamousEvent() {}
+    public EAFamousEvent() {}
 
-    public FamousEvent(@NotNull Type type, long channel, @NotNull String message, long user) {
+    public EAFamousEvent(@NotNull Type type, long channel, @NotNull String message, long user) {
         this.type = type;
         this.channel = channel;
         this.message = message;
@@ -21,8 +21,8 @@ public class FamousEvent extends EAObject {
     }
 
     @NotNull
-    public static FamousEvent getExample() {
-        return new FamousEvent(
+    public static EAFamousEvent getExample() {
+        return new EAFamousEvent(
                 Type.FAMOUS,
                 ExampleUtility.Random.discordId(),
                 "This is a famous event",

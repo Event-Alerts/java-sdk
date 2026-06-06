@@ -1,13 +1,13 @@
 package gg.eventalerts.sdk.json;
 
-import gg.eventalerts.sdk.object.Event;
-import gg.eventalerts.sdk.object.PartnerServer;
-import gg.eventalerts.sdk.object.Player;
+import gg.eventalerts.sdk.object.EAEvent;
+import gg.eventalerts.sdk.object.EAPartnerServer;
+import gg.eventalerts.sdk.object.EAPlayer;
 import gg.eventalerts.sdk.support.JsonRoundTripSupport;
 import gg.eventalerts.sdk.websocket.SocketActionName;
 import gg.eventalerts.sdk.websocket.SocketEventName;
 import gg.eventalerts.sdk.websocket.message.action.SocketAction;
-import gg.eventalerts.sdk.websocket.message.action.UpdateSubscriptionAction;
+import gg.eventalerts.sdk.websocket.message.action.EAUpdateSubscriptionAction;
 import gg.eventalerts.sdk.websocket.message.event.SocketEvent;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
@@ -24,8 +24,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class GsonRoundTripTest {
     @Test
     void eventRoundTripPreservesCoreFields() {
-        final Event original = Event.getExample();
-        final Event parsed = JsonRoundTripSupport.roundTrip(original, Event.class);
+        final EAEvent original = EAEvent.getExample();
+        final EAEvent parsed = JsonRoundTripSupport.roundTrip(original, EAEvent.class);
 
         assertNotNull(parsed);
         assertEquals(original.id, parsed.id);
@@ -46,8 +46,8 @@ class GsonRoundTripTest {
 
     @Test
     void playerRoundTripPreservesNestedObjects() {
-        final Player original = Player.getExample();
-        final Player parsed = JsonRoundTripSupport.roundTrip(original, Player.class);
+        final EAPlayer original = EAPlayer.getExample();
+        final EAPlayer parsed = JsonRoundTripSupport.roundTrip(original, EAPlayer.class);
 
         assertNotNull(parsed);
         assertEquals(original.id, parsed.id);
@@ -73,8 +73,8 @@ class GsonRoundTripTest {
 
     @Test
     void partnerServerRoundTripPreservesNestedObjects() {
-        final PartnerServer original = PartnerServer.getExample();
-        final PartnerServer parsed = JsonRoundTripSupport.roundTrip(original, PartnerServer.class);
+        final EAPartnerServer original = EAPartnerServer.getExample();
+        final EAPartnerServer parsed = JsonRoundTripSupport.roundTrip(original, EAPartnerServer.class);
 
         assertNotNull(parsed);
         assertEquals(original.id, parsed.id);
@@ -109,14 +109,14 @@ class GsonRoundTripTest {
 
     @Test
     void socketEventRoundTripPreservesEnvelopeAndPayload() {
-        final SocketEvent<Event> original = new SocketEvent<>();
+        final SocketEvent<EAEvent> original = new SocketEvent<>();
         original.event = SocketEventName.EVENT_POSTED;
         original.sequence = 5;
         original.timestamp = new Date(1_700_000_000_123L);
-        original.data = Event.getExample();
+        original.data = EAEvent.getExample();
 
-        final Type type = JsonRoundTripSupport.typeOf(SocketEvent.class, Event.class);
-        final SocketEvent<Event> parsed = JsonRoundTripSupport.roundTrip(original, type);
+        final Type type = JsonRoundTripSupport.typeOf(SocketEvent.class, EAEvent.class);
+        final SocketEvent<EAEvent> parsed = JsonRoundTripSupport.roundTrip(original, type);
 
         assertNotNull(parsed);
         assertEquals(original.event, parsed.event);
@@ -129,14 +129,14 @@ class GsonRoundTripTest {
 
     @Test
     void socketActionRoundTripPreservesActionAndPayload() {
-        final SocketAction<UpdateSubscriptionAction> original = new SocketAction<>(
+        final SocketAction<EAUpdateSubscriptionAction> original = new SocketAction<>(
                 SocketActionName.UPDATE_SUBSCRIPTION,
-                new UpdateSubscriptionAction(
-                        Set.of(SocketEventName.EVENT_POSTED, SocketEventName.LINK),
-                        Set.of(SocketEventName.EVENT_CANCELLED)));
+                new EAUpdateSubscriptionAction(
+                        new HashSet<>(Arrays.asList(SocketEventName.EVENT_POSTED, SocketEventName.LINK)),
+                        Collections.singleton(SocketEventName.EVENT_CANCELLED)));
 
-        final Type type = JsonRoundTripSupport.typeOf(SocketAction.class, UpdateSubscriptionAction.class);
-        final SocketAction<UpdateSubscriptionAction> parsed = JsonRoundTripSupport.roundTrip(original, type);
+        final Type type = JsonRoundTripSupport.typeOf(SocketAction.class, EAUpdateSubscriptionAction.class);
+        final SocketAction<EAUpdateSubscriptionAction> parsed = JsonRoundTripSupport.roundTrip(original, type);
 
         assertNotNull(parsed);
         assertEquals(original.action, parsed.action);

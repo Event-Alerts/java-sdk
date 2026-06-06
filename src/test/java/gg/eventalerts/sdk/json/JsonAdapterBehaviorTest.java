@@ -1,11 +1,12 @@
 package gg.eventalerts.sdk.json;
 
-import gg.eventalerts.sdk.object.Event;
+import gg.eventalerts.sdk.object.EAEvent;
 import gg.eventalerts.sdk.support.JsonRoundTripSupport;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Set;
 import java.util.UUID;
@@ -20,15 +21,15 @@ class JsonAdapterBehaviorTest {
         assertNull(GSONProvider.GSON.fromJson("\"not-a-date\"", Date.class));
         assertNull(GSONProvider.GSON.fromJson("\"not-a-uuid\"", UUID.class));
         assertNull(GSONProvider.GSON.fromJson("\"not-an-object-id\"", ObjectId.class));
-        assertNull(GSONProvider.GSON.fromJson("\"NOT_A_REAL_ENUM\"", Event.Type.class));
+        assertNull(GSONProvider.GSON.fromJson("\"NOT_A_REAL_ENUM\"", EAEvent.Type.class));
     }
 
     @Test
     void invalidSetMembersAreDroppedInsteadOfBreakingParsing() {
-        final Type type = JsonRoundTripSupport.typeOf(Set.class, Event.PingRole.class);
+        final Type type = JsonRoundTripSupport.typeOf(Set.class, EAEvent.PingRole.class);
 
         assertEquals(
-                Set.of(Event.PingRole.PARTNER),
+                Collections.singleton(EAEvent.PingRole.PARTNER),
                 GSONProvider.GSON.fromJson("[\"PARTNER\",\"NOT_A_REAL_VALUE\"]", type));
     }
 

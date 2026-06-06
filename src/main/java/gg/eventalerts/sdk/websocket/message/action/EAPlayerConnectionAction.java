@@ -9,15 +9,15 @@ import java.util.Date;
 import java.util.UUID;
 
 
-public class PlayerConnectionAction extends EAObject {
+public class EAPlayerConnectionAction extends EAObject {
     @Nullable public UUID uuid;
     @Nullable public String username;
     @Nullable public Date timestamp;
     @Nullable public Type type;
 
-    public PlayerConnectionAction() {}
+    public EAPlayerConnectionAction() {}
 
-    public PlayerConnectionAction(@NotNull UUID uuid, @NotNull String username, @NotNull Date timestamp, @NotNull Type type) {
+    public EAPlayerConnectionAction(@NotNull UUID uuid, @NotNull String username, @NotNull Date timestamp, @NotNull Type type) {
         this.uuid = uuid;
         this.username = username;
         this.timestamp = timestamp;
@@ -25,12 +25,12 @@ public class PlayerConnectionAction extends EAObject {
     }
 
     @NotNull
-    public static PlayerConnectionAction getExample() {
-        return new PlayerConnectionAction(
+    public static EAPlayerConnectionAction getExample() {
+        return new EAPlayerConnectionAction(
                 ExampleUtility.Minecraft.SRNYX_UUID,
                 "srnyx",
                 new Date(),
-                PlayerConnectionAction.Type.JOIN);
+                EAPlayerConnectionAction.Type.JOIN);
     }
 
     public enum Type {

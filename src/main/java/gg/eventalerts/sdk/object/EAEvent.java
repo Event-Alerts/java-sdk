@@ -4,13 +4,12 @@ import gg.eventalerts.sdk.ExampleUtility;
 import org.bson.types.ObjectId;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.srnyx.javautilities.MapGenerator;
 
-import java.util.Date;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 
-public class Event extends EAObject {
+public class EAEvent extends EAObject {
     // BUILDER/CUSTOM
     @Nullable public ObjectId id;
     @Nullable public Type type;
@@ -44,9 +43,9 @@ public class Event extends EAObject {
     @Nullable public Date time;
     @Nullable public Set<Long> subscribers;
 
-    public Event() {}
+    public EAEvent() {}
 
-    public Event(@Nullable ObjectId id, @Nullable Type type, @Nullable Long channel, @Nullable Long message, @Nullable Long controlPanel, @Nullable Cancellation cancellation, @Nullable Set<Review> reviews, @Nullable Boolean custom, @Nullable Date created, @Nullable String title, @Nullable Long host, @Nullable String description, @Nullable Set<Long> roles, @Nullable Set<PingRole> rolesNamed, @Nullable ObjectId server, @Nullable Media media, @Nullable Source source, @Nullable Mode mode, @Nullable String ip, @Nullable Set<Platform> platforms, @Nullable String platform, @Nullable String version, @Nullable String prize, @Nullable Integer maxPlayers, @Nullable Date time, @Nullable Set<Long> subscribers) {
+    public EAEvent(@Nullable ObjectId id, @Nullable Type type, @Nullable Long channel, @Nullable Long message, @Nullable Long controlPanel, @Nullable Cancellation cancellation, @Nullable Set<Review> reviews, @Nullable Boolean custom, @Nullable Date created, @Nullable String title, @Nullable Long host, @Nullable String description, @Nullable Set<Long> roles, @Nullable Set<PingRole> rolesNamed, @Nullable ObjectId server, @Nullable Media media, @Nullable Source source, @Nullable Mode mode, @Nullable String ip, @Nullable Set<Platform> platforms, @Nullable String platform, @Nullable String version, @Nullable String prize, @Nullable Integer maxPlayers, @Nullable Date time, @Nullable Set<Long> subscribers) {
         this.id = id;
         this.type = type;
         this.channel = channel;
@@ -78,8 +77,8 @@ public class Event extends EAObject {
     @Override
     public boolean equals(@Nullable Object object) {
         if (this == object) return true;
-        if (!(object instanceof final Event event)) return false;
-        return id != null && id.equals(event.id);
+        if (!(object instanceof EAEvent)) return false;
+        return id != null && id.equals(((EAEvent) object).id);
     }
 
     @Override
@@ -89,34 +88,34 @@ public class Event extends EAObject {
     }
 
     @NotNull
-    public static Event getExample() {
-        return new Event(
+    public static EAEvent getExample() {
+        return new EAEvent(
                 new ObjectId(),
                 Type.PARTNER,
                 ExampleUtility.Random.discordId(),
                 ExampleUtility.Random.discordId(),
                 ExampleUtility.Random.discordId(),
                 Cancellation.getExample(),
-                Set.of(Review.getExample()),
+                Collections.singleton(Review.getExample()),
                 false,
                 new Date(),
                 "Example Event",
                 ExampleUtility.User.SRNYX_ID,
                 "This is an example event description.",
-                Set.of(ExampleUtility.Role.PARTNER_EVENTS_ID, ExampleUtility.Role.MONEY_EVENTS_ID),
-                Set.of(PingRole.PARTNER, PingRole.MONEY),
+                new HashSet<>(Arrays.asList(ExampleUtility.Role.PARTNER_EVENTS_ID, ExampleUtility.Role.MONEY_EVENTS_ID)),
+                new HashSet<>(Arrays.asList(PingRole.PARTNER, PingRole.MONEY)),
                 new ObjectId(),
                 Media.getExample(),
                 Source.DISCORD,
                 Mode.TEXT,
                 "play.eventalerts.gg",
-                Set.of(Platform.JAVA),
+                Collections.singleton(Platform.JAVA),
                 "Java",
                 "1.21.11",
                 "$10 USD",
                 100,
                 new Date(),
-                Set.of(ExampleUtility.User.RAME_ID, ExampleUtility.User.REECE_ID));
+                new HashSet<>(Arrays.asList(ExampleUtility.User.RAME_ID, ExampleUtility.User.REECE_ID)));
     }
 
     public enum Mode {
@@ -198,7 +197,7 @@ public class Event extends EAObject {
                     ExampleUtility.User.OIIINK_ID,
                     new Date(),
                     "This event was really fun and well organized! I look forward to future events.",
-                    Map.of(
+                    MapGenerator.HASH_MAP.mapOf(
                             Category.ORGANIZATION, 5,
                             Category.COMMUNICATION, 5,
                             Category.ENJOYMENT, 4));

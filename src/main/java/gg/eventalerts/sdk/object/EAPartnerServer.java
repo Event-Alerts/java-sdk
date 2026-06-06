@@ -4,13 +4,16 @@ import gg.eventalerts.sdk.ExampleUtility;
 import org.bson.types.ObjectId;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xyz.srnyx.javautilities.MapGenerator;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 
-public class PartnerServer extends EAObject {
+public class EAPartnerServer extends EAObject {
     @Nullable public ObjectId id;
     @Nullable public Long serverId;
     @Nullable public Date created;
@@ -27,9 +30,9 @@ public class PartnerServer extends EAObject {
     @Nullable public DisableData disableData;
     @Nullable public String apiKey;
 
-    public PartnerServer() {}
+    public EAPartnerServer() {}
 
-    public PartnerServer(@Nullable ObjectId id, @Nullable Long serverId, @Nullable Date created, @Nullable Set<Long> representatives, @Nullable Date enabled, @Nullable String name, @Nullable String description, @Nullable String invite, @Nullable Set<Tag> tags, @Nullable Integer color, @Nullable String thumbnail, @Nullable Long message, @Nullable Map<Long, Integer> gets, @Nullable DisableData disableData, @Nullable String apiKey) {
+    public EAPartnerServer(@Nullable ObjectId id, @Nullable Long serverId, @Nullable Date created, @Nullable Set<Long> representatives, @Nullable Date enabled, @Nullable String name, @Nullable String description, @Nullable String invite, @Nullable Set<Tag> tags, @Nullable Integer color, @Nullable String thumbnail, @Nullable Long message, @Nullable Map<Long, Integer> gets, @Nullable DisableData disableData, @Nullable String apiKey) {
         this.id = id;
         this.serverId = serverId;
         this.created = created;
@@ -50,8 +53,8 @@ public class PartnerServer extends EAObject {
     @Override
     public boolean equals(@Nullable Object object) {
         if (this == object) return true;
-        if (!(object instanceof final PartnerServer partnerServer)) return false;
-        return id != null && id.equals(partnerServer.id);
+        if (!(object instanceof EAPartnerServer)) return false;
+        return id != null && id.equals(((EAPartnerServer) object).id);
     }
 
     @Override
@@ -61,21 +64,21 @@ public class PartnerServer extends EAObject {
     }
 
     @NotNull
-    public static PartnerServer getExample() {
-        return new PartnerServer(
+    public static EAPartnerServer getExample() {
+        return new EAPartnerServer(
                 new ObjectId(),
                 ExampleUtility.Guild.EVENT_ALERTS_ID,
                 new Date(),
-                Set.of(ExampleUtility.User.SRNYX_ID, ExampleUtility.User.OIIINK_ID),
+                new HashSet<>(Arrays.asList(ExampleUtility.User.SRNYX_ID, ExampleUtility.User.OIIINK_ID)),
                 null,
                 "Example Server",
                 "This is an example partner server.",
                 "skeppy",
-                Set.of(Tag.FUN, Tag.PVP),
+                new HashSet<>(Arrays.asList(Tag.FUN, Tag.PVP)),
                 0xFF5733,
                 "https://us-east-1.tixte.net/uploads/img.venox.network/bee.png",
                 null,
-                Map.of(
+                MapGenerator.HASH_MAP.mapOf(
                         ExampleUtility.User.RAME_ID, 10,
                         ExampleUtility.User.REECE_ID, 5),
                 DisableData.getExample(),

@@ -1,17 +1,17 @@
 package gg.eventalerts.sdk.websocket.support;
 
 import gg.eventalerts.sdk.json.GSONProvider;
-import gg.eventalerts.sdk.object.Event;
+import gg.eventalerts.sdk.object.EAEvent;
 import gg.eventalerts.sdk.support.JsonRoundTripSupport;
 import gg.eventalerts.sdk.websocket.SocketEventName;
 import gg.eventalerts.sdk.websocket.message.action.SocketAction;
-import gg.eventalerts.sdk.websocket.message.action.PlayerConnectionAction;
-import gg.eventalerts.sdk.websocket.message.action.UpdateSubscriptionAction;
+import gg.eventalerts.sdk.websocket.message.action.EAPlayerConnectionAction;
+import gg.eventalerts.sdk.websocket.message.action.EAUpdateSubscriptionAction;
 import gg.eventalerts.sdk.websocket.message.event.SocketEvent;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
-import org.jspecify.annotations.NonNull;
+import org.jetbrains.annotations.NotNull;
 
 import java.net.InetSocketAddress;
 import java.util.Date;
@@ -29,11 +29,11 @@ public final class WebSocketFixtureServer extends WebSocketServer {
     private final AtomicReference<ClientHandshake> handshake = new AtomicReference<>();
     private final AtomicReference<Throwable> failure = new AtomicReference<>();
     private final AtomicBoolean eventSent = new AtomicBoolean(false);
-    private final AtomicReference<Event> sentEvent = new AtomicReference<>();
+    private final AtomicReference<EAEvent> sentEvent = new AtomicReference<>();
 
-    private final java.lang.reflect.Type actionType = JsonRoundTripSupport.typeOf(SocketAction.class, UpdateSubscriptionAction.class);
-    private final java.lang.reflect.Type playerConnectionActionType = JsonRoundTripSupport.typeOf(SocketAction.class, PlayerConnectionAction.class);
-    private final java.lang.reflect.Type eventType = JsonRoundTripSupport.typeOf(SocketEvent.class, Event.class);
+    private final java.lang.reflect.Type actionType = JsonRoundTripSupport.typeOf(SocketAction.class, EAUpdateSubscriptionAction.class);
+    private final java.lang.reflect.Type playerConnectionActionType = JsonRoundTripSupport.typeOf(SocketAction.class, EAPlayerConnectionAction.class);
+    private final java.lang.reflect.Type eventType = JsonRoundTripSupport.typeOf(SocketEvent.class, EAEvent.class);
 
     public WebSocketFixtureServer(InetSocketAddress address) {
         super(address);
@@ -70,10 +70,10 @@ public final class WebSocketFixtureServer extends WebSocketServer {
         messages.add(message);
 
         if (eventSent.compareAndSet(false, true)) {
-            final Event event = Event.getExample();
+            final EAEvent event = EAEvent.getExample();
             sentEvent.set(event);
 
-            final SocketEvent<Event> envelope = new SocketEvent<>();
+            final SocketEvent<EAEvent> envelope = new SocketEvent<>();
             envelope.event = SocketEventName.EVENT_POSTED;
             envelope.sequence = 3;
             envelope.timestamp = new Date(1_700_000_000_123L);
@@ -95,7 +95,7 @@ public final class WebSocketFixtureServer extends WebSocketServer {
         return failure.get();
     }
 
-    public boolean awaitMessageCount(int expected, long timeout, @NonNull TimeUnit unit) throws InterruptedException {
+    public boolean awaitMessageCount(int expected, long timeout, @NotNull TimeUnit unit) throws InterruptedException {
         final long deadline = System.nanoTime() + unit.toNanos(timeout);
         while (System.nanoTime() < deadline) {
             if (messages.size() >= expected) return true;
@@ -104,15 +104,15 @@ public final class WebSocketFixtureServer extends WebSocketServer {
         return messages.size() >= expected;
     }
 
-    public SocketAction<UpdateSubscriptionAction> parseAction(int index) {
+    public SocketAction<EAUpdateSubscriptionAction> parseAction(int index) {
         return GSONProvider.GSON.fromJson(messages.get(index), actionType);
     }
 
-    public SocketAction<PlayerConnectionAction> parsePlayerConnectionAction(int index) {
+    public SocketAction<EAPlayerConnectionAction> parsePlayerConnectionAction(int index) {
         return GSONProvider.GSON.fromJson(messages.get(index), playerConnectionActionType);
     }
 
-    public Event sentEvent() {
+    public EAEvent sentEvent() {
         return sentEvent.get();
     }
 }

@@ -28,7 +28,7 @@ public final class GSONProvider {
             .registerTypeAdapter(ObjectId.class, new ObjectIdAdapter())
             .registerTypeAdapter(String.class, new StringAdapter())
             .registerTypeAdapter(UUID.class, new UUIDAdapter())
-            .registerTypeAdapterFactory(new SetAdapter())
+            .registerTypeAdapterFactory(new CollectionAdapter())
             .create();
 
     @Nullable

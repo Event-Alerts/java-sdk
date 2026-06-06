@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.Set;
 
 
-public class ServerApplication extends EAObject {
+public class EAServerApplication extends EAObject {
     @Nullable public ObjectId id;
     @Nullable public Long applicant;
     @Nullable public Long channel;
@@ -18,9 +18,9 @@ public class ServerApplication extends EAObject {
     @Nullable public ApprovedBy approvedBy;
     @Nullable public Data data;
 
-    public ServerApplication() {}
+    public EAServerApplication() {}
 
-    public ServerApplication(@Nullable ObjectId id, @Nullable Long applicant, @Nullable Long channel, @Nullable Date created, @Nullable Long message, @Nullable ApprovedBy approvedBy, @Nullable Data data) {
+    public EAServerApplication(@Nullable ObjectId id, @Nullable Long applicant, @Nullable Long channel, @Nullable Date created, @Nullable Long message, @Nullable ApprovedBy approvedBy, @Nullable Data data) {
         this.id = id;
         this.applicant = applicant;
         this.channel = channel;
@@ -31,8 +31,8 @@ public class ServerApplication extends EAObject {
     }
 
     @NotNull
-    public static ServerApplication getExample() {
-        return new ServerApplication(
+    public static EAServerApplication getExample() {
+        return new EAServerApplication(
                 new ObjectId(),
                 ExampleUtility.User.SRNYX_ID,
                 ExampleUtility.Random.discordId(),
@@ -52,13 +52,13 @@ public class ServerApplication extends EAObject {
         @Nullable public String name;
         @Nullable public String description;
         @Nullable public String invite;
-        @Nullable public Set<PartnerServer.Tag> tags;
+        @Nullable public Set<EAPartnerServer.Tag> tags;
         @Nullable public Integer color;
         @Nullable public String thumbnail;
 
         public Data() {}
 
-        public Data(@Nullable Set<Long> representatives, @Nullable String name, @Nullable String description, @Nullable String invite, @Nullable Set<PartnerServer.Tag> tags, @Nullable Integer color, @Nullable String thumbnail) {
+        public Data(@Nullable Set<Long> representatives, @Nullable String name, @Nullable String description, @Nullable String invite, @Nullable Set<EAPartnerServer.Tag> tags, @Nullable Integer color, @Nullable String thumbnail) {
             this.representatives = representatives;
             this.name = name;
             this.description = description;
@@ -71,11 +71,11 @@ public class ServerApplication extends EAObject {
         @NotNull
         public static Data getExample() {
             return new Data(
-                    Set.of(ExampleUtility.User.SRNYX_ID, ExampleUtility.User.OIIINK_ID),
+                    new HashSet<>(Arrays.asList(ExampleUtility.User.SRNYX_ID, ExampleUtility.User.OIIINK_ID)),
                     "Example Server",
                     "This is an example server application.",
                     "skeppy",
-                    Set.of(PartnerServer.Tag.FUN, PartnerServer.Tag.PVP),
+                    new HashSet<>(Arrays.asList(EAPartnerServer.Tag.FUN, EAPartnerServer.Tag.PVP)),
                     0xFF0000,
                     "https://us-east-1.tixte.net/uploads/img.venox.network/bee.png");
         }

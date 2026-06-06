@@ -42,7 +42,7 @@ dependencies {
 void main() {
     // JSON round-trip example
     final Event original = Event.getExample();
-    final String json = GSONProvider.GSON.toJson(original);
+    final String json = original.toJson();
     final Event parsed = GSONProvider.GSON.fromJson(json, Event.class);
     System.out.println("Round-trip title: " + parsed.title);
 

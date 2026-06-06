@@ -10,6 +10,7 @@ import gg.eventalerts.sdk.websocket.handler.LinkHandler;
 import gg.eventalerts.sdk.websocket.handler.ServerEditedHandler;
 import gg.eventalerts.sdk.websocket.handler.ServerEnabledHandler;
 import org.junit.jupiter.api.Test;
+import xyz.srnyx.javautilities.MapGenerator;
 
 import java.util.Map;
 
@@ -19,14 +20,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class SocketHandlerRegistryTest {
     @Test
     void eventNamesExposeTheExpectedHandlerClasses() {
-        final Map<SocketEventName, Class<?>> expected = Map.ofEntries(
-                Map.entry(SocketEventName.BOOSTER_PASS_GIVEN, BoosterPassGivenHandler.class),
-                Map.entry(SocketEventName.CROSS_BAN, CrossBanHandler.class),
-                Map.entry(SocketEventName.EVENT_CANCELLED, EventCancelledHandler.class),
-                Map.entry(SocketEventName.EVENT_CHAT, EventChatHandler.class),
-                Map.entry(SocketEventName.EVENT_POSTED, EventPostedHandler.class),
-                Map.entry(SocketEventName.FAMOUS_EVENT_POSTED, FamousEventPostedHandler.class),
-                Map.entry(SocketEventName.LINK, LinkHandler.class));
+        final Map<SocketEventName, Class<?>> expected = MapGenerator.HASH_MAP.mapOf(
+                SocketEventName.BOOSTER_PASS_GIVEN, BoosterPassGivenHandler.class,
+                SocketEventName.CROSS_BAN, CrossBanHandler.class,
+                SocketEventName.EVENT_CANCELLED, EventCancelledHandler.class,
+                SocketEventName.EVENT_CHAT, EventChatHandler.class,
+                SocketEventName.EVENT_POSTED, EventPostedHandler.class,
+                SocketEventName.FAMOUS_EVENT_POSTED, FamousEventPostedHandler.class,
+                SocketEventName.LINK, LinkHandler.class);
         expected.forEach((name, handlerClass) -> assertEquals(handlerClass, name.getHandlerClass()));
         assertEquals(ServerEditedHandler.class, SocketEventName.SERVER_EDITED.getHandlerClass());
         assertEquals(ServerEnabledHandler.class, SocketEventName.SERVER_ENABLED.getHandlerClass());

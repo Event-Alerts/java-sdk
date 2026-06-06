@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.UUID;
 
 
-public class CrossBan extends EAObject {
+public class EACrossBan extends EAObject {
     @Nullable public ObjectId id;
     @Nullable public Long discordId;
     @Nullable public UUID minecraftUuid;
@@ -17,9 +17,9 @@ public class CrossBan extends EAObject {
     @Nullable public Date expiration;
     @Nullable public Date created;
 
-    public CrossBan() {}
+    public EACrossBan() {}
 
-    public CrossBan(@Nullable ObjectId id, @Nullable Long discordId, @Nullable UUID minecraftUuid, @Nullable String reason, @Nullable Date expiration, @Nullable Date created) {
+    public EACrossBan(@Nullable ObjectId id, @Nullable Long discordId, @Nullable UUID minecraftUuid, @Nullable String reason, @Nullable Date expiration, @Nullable Date created) {
         this.id = id;
         this.discordId = discordId;
         this.minecraftUuid = minecraftUuid;
@@ -28,15 +28,15 @@ public class CrossBan extends EAObject {
         this.created = created;
     }
 
-    public CrossBan(@NotNull CrossBan crossBan) {
+    public EACrossBan(@NotNull EACrossBan crossBan) {
         this(crossBan.id, crossBan.discordId, crossBan.minecraftUuid, crossBan.reason, crossBan.expiration, crossBan.created);
     }
 
     @Override
     public boolean equals(@Nullable Object object) {
         if (this == object) return true;
-        if (!(object instanceof final CrossBan crossBan)) return false;
-        return id != null && id.equals(crossBan.id);
+        if (!(object instanceof EACrossBan)) return false;
+        return id != null && id.equals(((EACrossBan) object).id);
     }
 
     @Override
@@ -46,8 +46,8 @@ public class CrossBan extends EAObject {
     }
 
     @NotNull
-    public static CrossBan getExample() {
-        return new CrossBan(
+    public static EACrossBan getExample() {
+        return new EACrossBan(
                 new ObjectId(),
                 ExampleUtility.User.SRNYX_ID,
                 ExampleUtility.Minecraft.SRNYX_UUID,
