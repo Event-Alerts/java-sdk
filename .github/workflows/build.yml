@@ -1,0 +1,26 @@
+name: Maven Publish (Snapshots)
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'gradle/**'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'core/build.gradle.kts'
+      - 'core/src/**'
+      - 'http/build.gradle.kts'
+      - 'http/src/**'
+      - 'websocket/build.gradle.kts'
+      - 'websocket/src/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: srnyx/tools/.github/workflows/maven_publish.yml@main
+    with:
+      name: Event Alerts Java SDK
+      channel: snapshots
+    secrets: inherit
