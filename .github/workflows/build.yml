@@ -23,4 +23,6 @@ jobs:
     with:
       name: Event Alerts Java SDK
       channel: snapshots
-    secrets: inherit
+    secrets:
+      MAVEN_NAME: ${{ secrets.MAVEN_NAME }}
+      MAVEN_SECRET: ${{ secrets.MAVEN_SECRET }}
