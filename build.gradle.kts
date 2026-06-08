@@ -12,8 +12,6 @@ plugins {
     id("xyz.srnyx.gradle-galaxy") version "3.0.1" apply false
 }
 
-val annotations: String = "org.jetbrains:annotations:26.1.0"
-
 subprojects {
     apply(plugin = "java-library")
     apply(plugin = "xyz.srnyx.gradle-galaxy")
@@ -25,6 +23,7 @@ subprojects {
 
     repository(Repository.SRNYX_RELEASES, Repository.SRNYX_SNAPSHOTS, Repository.MAVEN_CENTRAL)
 
+    val annotations = "org.jetbrains:annotations:26.1.0"
     dependencies {
         add("compileOnly", annotations)
 

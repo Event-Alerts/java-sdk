@@ -1,4 +1,4 @@
-# Event Alerts Java SDK
+# Event Alerts Java SDK [![Release](https://repo.srnyx.com/api/badge/latest/releases/gg/eventalerts/sdk/core?color=b8860b&name=Release)](https://repo.srnyx.com/#/releases/gg/eventalerts/sdk) [![Snapshot](https://repo.srnyx.com/api/badge/latest/snapshots/gg/eventalerts/sdk/core?color=b8860b&name=Snapshot)](https://repo.srnyx.com/#/releases/gg/eventalerts/sdk)
 
 Java models, HTTP client, and websocket helpers for the Event Alerts API.
 
@@ -15,6 +15,45 @@ Java models, HTTP client, and websocket helpers for the Event Alerts API.
 - `EAHTTP` wraps the API's HTTP endpoints
 - `EAWebSocket` handles websocket connection setup, event dispatch, and action sending
 - Typed websocket envelopes are available through `SocketEvent<T>` and `SocketAction<T>`
+
+## Dependency Patterns
+
+Use the smallest module that matches your use case:
+
+### Shared models and JSON only
+
+```kotlin
+dependencies {
+    implementation("gg.eventalerts.sdk:core:1.0.0")
+}
+```
+
+### HTTP only
+
+```kotlin
+dependencies {
+    implementation("gg.eventalerts.sdk:http:1.0.0")
+}
+```
+
+### Websocket only
+
+```kotlin
+dependencies {
+    implementation("gg.eventalerts.sdk:websocket:1.0.0")
+}
+```
+
+### HTTP and websocket together
+
+```kotlin
+dependencies {
+    implementation("gg.eventalerts.sdk:http:1.0.0")
+    implementation("gg.eventalerts.sdk:websocket:1.0.0")
+}
+```
+
+`core` is brought in transitively by `http` and `websocket`, so most consumers do not need to declare it directly.
 
 ## Requirements
 
@@ -34,28 +73,15 @@ repositories {
 }
 
 dependencies {
-    implementation("gg.eventalerts.sdk:core:0.0.1")
-    implementation("gg.eventalerts.sdk:http:0.0.1")
-    implementation("gg.eventalerts.sdk:websocket:0.0.1")
+    implementation("gg.eventalerts.sdk:core:1.0.0")
+    implementation("gg.eventalerts.sdk:http:1.0.0")
+    implementation("gg.eventalerts.sdk:websocket:1.0.0")
 }
 ```
 
 ### `Main.java`
 
 ```java
-import gg.eventalerts.sdk.http.EAHTTP;
-import gg.eventalerts.sdk.json.GSONProvider;
-import gg.eventalerts.sdk.object.EAEvent;
-import gg.eventalerts.sdk.websocket.EAWebSocket;
-import gg.eventalerts.sdk.websocket.SocketActionName;
-import gg.eventalerts.sdk.websocket.handler.EventPostedHandler;
-import gg.eventalerts.sdk.websocket.message.action.EAPlayerConnectionAction;
-import gg.eventalerts.sdk.websocket.message.event.SocketEvent;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.Date;
-import java.util.UUID;
-
 public class Main {
     public static void main(String[] args) {
         // JSON round-trip example
@@ -80,8 +106,8 @@ public class Main {
                         System.out.println("Title: " + object.data.title);
                     }
                 })
-                .buildThenConnect();
-
+                .build()
+                .connectBlocking();
         socket.send(SocketActionName.PLAYER_CONNECTION, new EAPlayerConnectionAction(
                 UUID.fromString("00000000-0000-0000-0000-000000000000"),
                 "srnyx",
