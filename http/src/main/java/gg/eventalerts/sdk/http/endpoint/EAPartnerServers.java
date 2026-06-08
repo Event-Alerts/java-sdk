@@ -5,7 +5,6 @@ import gg.eventalerts.sdk.http.response.APIResponse;
 import gg.eventalerts.sdk.object.EAPartnerServer;
 import org.bson.types.ObjectId;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 
 public class EAPartnerServers extends EAEndpoint<EAPartnerServer> {
@@ -23,8 +22,8 @@ public class EAPartnerServers extends EAEndpoint<EAPartnerServer> {
         return EAPartnerServer.class;
     }
 
-    @Nullable
-    public APIResponse retrieveOneById(@NotNull ObjectId id) {
+    @NotNull
+    public APIResponse<EAPartnerServer> retrieveOneById(@NotNull ObjectId id) {
         return retrieveOne("id", id.toHexString());
     }
 }

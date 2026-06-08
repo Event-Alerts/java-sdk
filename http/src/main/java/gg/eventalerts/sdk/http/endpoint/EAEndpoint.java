@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import gg.eventalerts.sdk.http.EAHTTP;
 import gg.eventalerts.sdk.http.response.APIResponse;
 import gg.eventalerts.sdk.http.response.ErrorResponse;
+import gg.eventalerts.sdk.http.response.FailedResponse;
 import gg.eventalerts.sdk.http.response.PaginatedResponse;
 import gg.eventalerts.sdk.http.response.SingleResponse;
 import gg.eventalerts.sdk.json.GSONProvider;
@@ -35,8 +36,8 @@ public abstract class EAEndpoint<O extends EAObject> {
     @NotNull
     public abstract Class<O> getObjectClass();
 
-    @Nullable
-    public APIResponse retrieve(@Nullable Map<String, Object> queryParams, @Nullable String... pathSegments) {
+    @NotNull
+    public APIResponse<O> retrieve(@Nullable Map<String, Object> queryParams, @Nullable String... pathSegments) {
         // Build query
         final StringBuilder queryString = new StringBuilder();
         if (queryParams != null) {
@@ -61,7 +62,7 @@ public abstract class EAEndpoint<O extends EAObject> {
         if (pathSegments != null) for (final String segment : pathSegments) path.append("/").append(segment);
 
         // Make request
-        APIResponse result = null;
+        APIResponse<O> result = null;
         HttpURLConnection connection = null;
         final String endpointPath = getPath();
         try {
@@ -79,7 +80,7 @@ public abstract class EAEndpoint<O extends EAObject> {
 
                 // Big error
                 if (inputStream == null) {
-                    result = new ErrorResponse(connection.getResponseCode(), connection.getResponseMessage());
+                    result = new ErrorResponse<>(connection.getResponseCode(), connection.getResponseMessage());
                     connection.disconnect();
                     return result;
                 }
@@ -91,7 +92,7 @@ public abstract class EAEndpoint<O extends EAObject> {
 
             // Error
             if (json.has("message")) {
-                result = GSONProvider.GSON.fromJson(json, ErrorResponse.class);
+                result = GSONProvider.GSON.fromJson(json, GSONProvider.typeOf(ErrorResponse.class, getObjectClass()));
 
                 // Return
                 connection.disconnect();
@@ -127,22 +128,22 @@ public abstract class EAEndpoint<O extends EAObject> {
 
             // Return
             if (connection != null) connection.disconnect();
-            return result;
+            return new FailedResponse<>(e, result);
         }
     }
 
-    @Nullable
-    public APIResponse retrieveMany(@Nullable Map<String, Object> query) {
+    @NotNull
+    public APIResponse<O> retrieveMany(@Nullable Map<String, Object> query) {
         return retrieve(query);
     }
 
-    @Nullable
-    public APIResponse retrieveMany() {
+    @NotNull
+    public APIResponse<O> retrieveMany() {
         return retrieveMany(null);
     }
 
-    @Nullable
-    public APIResponse retrieveOne(@NotNull String... pathSegments) {
+    @NotNull
+    public APIResponse<O> retrieveOne(@NotNull String... pathSegments) {
         return retrieve(null, pathSegments);
     }
 }

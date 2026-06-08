@@ -6,11 +6,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
 
-public class SingleResponse<O> extends CodeResponse<O> {
-    @Nullable public O data;
+public interface MessageResponse {
+    @Nullable
+    String getMessage();
 
     @NotNull
-    public Optional<O> getDataOptional() {
-        return Optional.ofNullable(data);
+    default Optional<String> getMessageOptional() {
+        return Optional.ofNullable(getMessage());
     }
 }

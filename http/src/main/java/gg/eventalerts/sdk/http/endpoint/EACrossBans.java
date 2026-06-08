@@ -4,7 +4,6 @@ import gg.eventalerts.sdk.http.EAHTTP;
 import gg.eventalerts.sdk.http.response.APIResponse;
 import gg.eventalerts.sdk.object.EACrossBan;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
@@ -24,13 +23,13 @@ public class EACrossBans extends EAEndpoint<EACrossBan> {
         return EACrossBan.class;
     }
 
-    @Nullable
-    public APIResponse retrieveOneByDiscordId(long discordId) {
+    @NotNull
+    public APIResponse<EACrossBan> retrieveOneByDiscordId(long discordId) {
         return retrieveOne("discord_id", String.valueOf(discordId));
     }
 
-    @Nullable
-    public APIResponse retrieveOneByMinecraftUuid(@NotNull UUID minecraftUuid) {
+    @NotNull
+    public APIResponse<EACrossBan> retrieveOneByMinecraftUuid(@NotNull UUID minecraftUuid) {
         return retrieveOne("minecraft_uuid", minecraftUuid.toString());
     }
 }

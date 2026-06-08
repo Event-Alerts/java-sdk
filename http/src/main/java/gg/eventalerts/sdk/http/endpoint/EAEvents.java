@@ -5,7 +5,6 @@ import gg.eventalerts.sdk.http.response.APIResponse;
 import gg.eventalerts.sdk.object.EAEvent;
 import org.bson.types.ObjectId;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 
 public class EAEvents extends EAEndpoint<EAEvent> {
@@ -23,8 +22,8 @@ public class EAEvents extends EAEndpoint<EAEvent> {
         return EAEvent.class;
     }
 
-    @Nullable
-    public APIResponse retrieveOneById(@NotNull ObjectId id) {
+    @NotNull
+    public APIResponse<EAEvent> retrieveOneById(@NotNull ObjectId id) {
         return retrieveOne("id", id.toHexString());
     }
 }
