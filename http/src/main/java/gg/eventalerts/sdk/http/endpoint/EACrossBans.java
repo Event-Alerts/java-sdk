@@ -1,7 +1,7 @@
 package gg.eventalerts.sdk.http.endpoint;
 
 import gg.eventalerts.sdk.http.EAHTTP;
-import gg.eventalerts.sdk.http.response.APIResponse;
+import gg.eventalerts.sdk.http.action.EAAction;
 import gg.eventalerts.sdk.object.EACrossBan;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,12 +24,12 @@ public class EACrossBans extends EAEndpoint<EACrossBan> {
     }
 
     @NotNull
-    public APIResponse<EACrossBan> retrieveOneByDiscordId(long discordId) {
+    public EAAction<EACrossBan> retrieveOneByDiscordId(long discordId) {
         return retrieveOne("discord_id", String.valueOf(discordId));
     }
 
     @NotNull
-    public APIResponse<EACrossBan> retrieveOneByMinecraftUuid(@NotNull UUID minecraftUuid) {
+    public EAAction<EACrossBan> retrieveOneByMinecraftUuid(@NotNull UUID minecraftUuid) {
         return retrieveOne("minecraft_uuid", minecraftUuid.toString());
     }
 }

@@ -1,7 +1,7 @@
 package gg.eventalerts.sdk.http.endpoint;
 
 import gg.eventalerts.sdk.http.EAHTTP;
-import gg.eventalerts.sdk.http.response.APIResponse;
+import gg.eventalerts.sdk.http.action.EAAction;
 import gg.eventalerts.sdk.object.EAPlayer;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,12 +24,12 @@ public class EAPlayers extends EAEndpoint<EAPlayer> {
     }
 
     @NotNull
-    public APIResponse<EAPlayer> retrieveOneByDiscordId(long discordId) {
+    public EAAction<EAPlayer> retrieveOneByDiscordId(long discordId) {
         return retrieveOne("discord", "id", String.valueOf(discordId));
     }
 
     @NotNull
-    public APIResponse<EAPlayer> retrieveOneByMinecraftUuid(@NotNull UUID minecraftUuid) {
+    public EAAction<EAPlayer> retrieveOneByMinecraftUuid(@NotNull UUID minecraftUuid) {
         return retrieveOne("minecraft", "uuid", minecraftUuid.toString());
     }
 }

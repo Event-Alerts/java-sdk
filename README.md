@@ -12,7 +12,8 @@ Java models, HTTP client, and websocket helpers for the Event Alerts API.
 
 - `GSONProvider.GSON` includes adapters for `Date`, `UUID`, `ObjectId`, enums, primitive wrappers, and sets
 - API models live under `gg.eventalerts.sdk.object`
-- `EAHTTP` wraps the API's HTTP endpoints
+- `EAHTTP` wraps the API's HTTP endpoints and returns action objects with `complete()` and `queue()`
+- HTTP actions support JDA-style composition with `map(...)`, `flatMap(...)`, `recoverWithEmptyList()`, and `recoverWithNull()`
 - `EAWebSocket` handles websocket connection setup, event dispatch, and action sending
 - Typed websocket envelopes are available through `SocketEvent<T>` and `SocketAction<T>`
 
@@ -83,7 +84,7 @@ dependencies {
 
 ```java
 public class Main {
-    public static void main(String[] args) {
+    static void main(String[] args) {
         // JSON round-trip example
         final EAEvent original = EAEvent.getExample();
         final String json = GSONProvider.GSON.toJson(original);
@@ -92,7 +93,15 @@ public class Main {
 
         // HTTP example
         final EAHTTP http = new EAHTTP.Builder("EventAlertsExample/1.0").build();
-        System.out.println(http.events.retrieveMany());
+        http.events.retrieveOneById(new ObjectId("507f1f77bcf86cd799439011")).queue(
+                event -> System.out.println("Loaded event: " + event.title),
+                error -> System.err.println("Failed to load event: " + error.getMessage()));
+
+        // Recover-with HTTP example
+        http.events.retrieveMany()
+                .recoverWithEmptyList() // If an error occurs, events will just be an empty list
+                .map(events -> events.size())
+                .queue(size -> System.out.println("Loaded events: " + size));
 
         // Websocket example
         final EAWebSocket socket = new EAWebSocket.Builder("EventAlertsExample/1.0")
@@ -137,7 +146,7 @@ Contains the common API models used by the Event Alerts API:
 
 ### HTTP: `gg.eventalerts.sdk.http`
 
-Contains `EAHTTP` and the typed endpoint wrappers:
+Contains `EAHTTP`, the shared `EAAction` type, and the typed endpoint wrappers:
 
 - `EACrossBans`
 - `EAEvents`

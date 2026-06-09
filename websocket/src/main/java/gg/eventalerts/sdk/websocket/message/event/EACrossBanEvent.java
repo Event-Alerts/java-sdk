@@ -8,6 +8,8 @@ import org.jetbrains.annotations.Nullable;
 public class EACrossBanEvent extends EACrossBan {
     @Nullable public Status status;
 
+    public EACrossBanEvent() {}
+
     public EACrossBanEvent(@NotNull EACrossBan crossBan, @Nullable Status status) {
         super(crossBan);
         this.status = status;

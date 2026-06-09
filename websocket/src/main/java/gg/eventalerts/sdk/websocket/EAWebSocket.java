@@ -1,7 +1,6 @@
 package gg.eventalerts.sdk.websocket;
 
 import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
 import gg.eventalerts.sdk.EventAlertsSDK;
 import gg.eventalerts.sdk.json.GSONProvider;
 import gg.eventalerts.sdk.object.EAObject;

@@ -1,7 +1,7 @@
 package gg.eventalerts.sdk.http.endpoint;
 
 import gg.eventalerts.sdk.http.EAHTTP;
-import gg.eventalerts.sdk.http.response.APIResponse;
+import gg.eventalerts.sdk.http.action.EAAction;
 import gg.eventalerts.sdk.object.EAEvent;
 import org.bson.types.ObjectId;
 import org.jetbrains.annotations.NotNull;
@@ -23,7 +23,7 @@ public class EAEvents extends EAEndpoint<EAEvent> {
     }
 
     @NotNull
-    public APIResponse<EAEvent> retrieveOneById(@NotNull ObjectId id) {
+    public EAAction<EAEvent> retrieveOneById(@NotNull ObjectId id) {
         return retrieveOne("id", id.toHexString());
     }
 }
