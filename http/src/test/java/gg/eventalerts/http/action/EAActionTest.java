@@ -53,6 +53,60 @@ class EAActionTest {
     }
 
     @Test
+    void ifPresentInvokesSuccessForPresentValue() throws InterruptedException {
+        final EAAction<Integer> action = new EAAction<>("base", () -> 5);
+        final CountDownLatch latch = new CountDownLatch(1);
+        final AtomicReference<Integer> result = new AtomicReference<>();
+
+        action.ifPresent(value -> {
+            result.set(value);
+            latch.countDown();
+        }, throwable -> {
+            throw new AssertionError("unexpected failure", throwable);
+        });
+
+        assertTrue(latch.await(5, TimeUnit.SECONDS));
+        assertEquals(Integer.valueOf(5), result.get());
+    }
+
+    @Test
+    void ifPresentSkipsNullValue() throws InterruptedException {
+        final EAAction<Integer> action = new EAAction<>("base", () -> null);
+        final CountDownLatch latch = new CountDownLatch(1);
+        final AtomicBoolean called = new AtomicBoolean(false);
+
+        action.ifPresent(value -> {
+            called.set(true);
+            latch.countDown();
+        }, throwable -> {
+            throw new AssertionError("unexpected failure", throwable);
+        });
+
+        assertFalse(latch.await(250, TimeUnit.MILLISECONDS));
+        assertFalse(called.get());
+    }
+
+    @Test
+    void ifPresentInvokesFailureOnError() throws InterruptedException {
+        final EAAction<Integer> action = new EAAction<>("base", () -> {
+            throw new IllegalStateException("boom");
+        });
+        final CountDownLatch latch = new CountDownLatch(1);
+        final AtomicReference<Throwable> failure = new AtomicReference<>();
+
+        action.ifPresent(value -> {
+            throw new AssertionError("unexpected success");
+        }, throwable -> {
+            failure.set(throwable);
+            latch.countDown();
+        });
+
+        assertTrue(latch.await(5, TimeUnit.SECONDS));
+        assertInstanceOf(IllegalStateException.class, failure.get());
+        assertEquals("boom", failure.get().getMessage());
+    }
+
+    @Test
     void onSuccessConsumerObservesSuccessWithoutChangingValue() throws Exception {
         final AtomicBoolean called = new AtomicBoolean(false);
         final EAAction<Integer> action = new EAAction<>("base", () -> 5)
@@ -101,7 +155,7 @@ class EAActionTest {
     }
 
     @Test
-    void recoverWithCanUseThrowableForFallback() throws Exception {
+    void onErrorMapCanUseThrowableForFallback() throws Exception {
         final AtomicReference<Throwable> captured = new AtomicReference<>();
         final EAAction<String> action = new EAAction<String>("base", () -> {
             throw new IllegalStateException("boom");
@@ -116,7 +170,7 @@ class EAActionTest {
     }
 
     @Test
-    void recoverWithCanReturnEmptyListFallback() throws Exception {
+    void onErrorMapCanReturnEmptyListFallback() throws Exception {
         final EAAction<java.util.List<Integer>> action = new EAAction<java.util.List<Integer>>("base", () -> {
             throw new IllegalStateException("boom");
         }).onErrorReturnEmptyList();
@@ -125,7 +179,7 @@ class EAActionTest {
     }
 
     @Test
-    void recoverWithCanReturnNullFallback() throws Exception {
+    void onErrorMapCanReturnNullFallback() throws Exception {
         final EAAction<Integer> action = new EAAction<Integer>("base", () -> {
             throw new IllegalStateException("boom");
         }).onErrorReturnNull();

@@ -99,45 +99,7 @@ class EAEndpointRetrieveTest {
     }
 
     @Test
-    void retrieveManyRecoverWithOverridesDefaultFallback() {
-        final EAHTTP http = new EAHTTP.Builder("EventAlertsSDK/1.0").url(baseUrl).build();
-        final EAEvent fallback = new EAEvent();
-        fallback.id = new ObjectId("507f1f77bcf86cd799439011");
-        fallback.title = "Recovered Event";
-
-        final List<EAEvent> result = http.events
-                .retrieveMany(Collections.singletonMap("force_error", true))
-                .onErrorReturn(Collections.singletonList(fallback))
-                .complete();
-
-        assertEquals(1, result.size());
-        assertEquals(fallback.id, result.get(0).id);
-        assertEquals("Recovered Event", result.get(0).title);
-        assertEquals("/api/v1/events", lastPath.get());
-        assertEquals("force_error=true", lastQuery.get());
-    }
-
-    @Test
-    void retrieveOneRecoverWithOverridesDefaultFallback() {
-        final EAHTTP http = new EAHTTP.Builder("EventAlertsSDK/1.0").url(baseUrl).build();
-        final EAEvent fallback = new EAEvent();
-        fallback.id = new ObjectId("507f1f77bcf86cd799439011");
-        fallback.title = "Recovered Event";
-
-        final EAEvent event = http.events
-                .retrieveOne("error")
-                .onErrorReturn(fallback)
-                .complete();
-
-        assertNotNull(event);
-        assertEquals(fallback.id, event.id);
-        assertEquals("Recovered Event", event.title);
-        assertEquals("/api/v1/events/error", lastPath.get());
-        assertNull(lastQuery.get());
-    }
-
-    @Test
-    void retrieveOneRecoverWithSeesTransportFailure() {
+    void retrieveOneOnErrorMapSeesTransportFailure() {
         final EAHTTP http = new EAHTTP.Builder("EventAlertsSDK/1.0").url(baseUrl).build();
         final EAEvents events = new EAEvents(http) {
             @Override @NotNull

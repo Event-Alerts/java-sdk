@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
+import java.util.NoSuchElementException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -22,6 +23,16 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
+/**
+ * Represents a deferred HTTP action.
+ * <p>
+ * Actions are async-first: {@link #queue()} and {@link #submit()} are the primary
+ * execution paths, while {@link #complete()} is the blocking convenience method.
+ * Actions can be composed with mapping, error handling, and side-effect taps
+ * without forcing immediate execution.
+ *
+ * @param <T> the action result type
+ */
 public class EAAction<T> {
     @NotNull private static final Logger LOGGER = Logger.getLogger(EAAction.class.getName());
     @NotNull private static final ExecutorService EXECUTOR = Executors.newCachedThreadPool(runnable -> {
@@ -37,38 +48,53 @@ public class EAAction<T> {
 
     @NotNull private final String description;
     @NotNull private final Function<Void, CompletableFuture<T>> submitter;
-    @Nullable private final Function<? super Throwable, ? extends T> recovery;
 
     public EAAction(@NotNull String description, @NotNull Callable<T> task) {
-        this(description, ignored -> submitCallable(task), null);
+        this(description, ignored -> submitCallable(task));
     }
 
-    private EAAction(@NotNull String description, @NotNull Function<Void, CompletableFuture<T>> submitter, @Nullable Function<? super Throwable, ? extends T> recovery) {
+    private EAAction(@NotNull String description, @NotNull Function<Void, CompletableFuture<T>> submitter) {
         this.description = description;
         this.submitter = submitter;
-        this.recovery = recovery;
     }
 
     @NotNull
     public CompletableFuture<T> submit() {
         try {
-            final CompletableFuture<T> future = submitter.apply(null);
-            return recovery == null ? future : applyRecovery(future);
+            return submitter.apply(null);
         } catch (final RuntimeException runtimeException) {
             final CompletableFuture<T> future = new CompletableFuture<>();
             future.completeExceptionally(runtimeException);
-            return recovery == null ? future : applyRecovery(future);
+            return future;
         }
     }
 
+    /**
+     * Queues this action with no success handler and {@link #getDefaultFailure() default failure handling}.
+     */
     public void queue() {
-        queue(null, null);
+        queue(null);
     }
 
+    /**
+     * Queues this action and invokes the provided success callback if the action completes successfully.
+     *
+     * @param success the success callback, or {@code null} to ignore success
+     */
     public void queue(@Nullable Consumer<? super T> success) {
-        queue(success, null);
+        queue(success, getDefaultFailure());
     }
 
+    /**
+     * Queues this action and invokes the provided callbacks when the action completes.
+     * <p>
+     * If the action succeeds, {@code success} receives the result.
+     * If the action fails and {@code failure} is present, the failure callback receives the throwable.
+     * If the failure callback is absent, the failure is logged and fatal {@link Error}s are rethrown.
+     *
+     * @param success the success callback, or {@code null} to ignore success
+     * @param failure the failure callback, or {@code null} to ignore failure
+     */
     public void queue(@Nullable Consumer<? super T> success, @Nullable Consumer<? super Throwable> failure) {
         submit().whenComplete((value, throwable) -> {
             if (throwable == null) {
@@ -84,7 +110,46 @@ public class EAAction<T> {
         });
     }
 
-    @NotNull
+    /**
+     * Queues this action and invokes the provided success callback only if the completed value is present (not null).
+     * <p>
+     * If the action fails and {@code failure} is present, the failure callback receives the throwable.
+     * If the action succeeds with {@code null}, neither callback is invoked.
+     *
+     * @param success the success callback, or {@code null} to ignore a present value
+     * @param failure the failure callback, or {@code null} to use the default failure handling
+     */
+    public void ifPresent(@Nullable Consumer<? super T> success, @Nullable Consumer<? super Throwable> failure) {
+        submit().whenComplete((value, throwable) -> {
+            if (throwable != null) {
+                handleFailure(unwrap(throwable), failure);
+                return;
+            }
+
+            if (value == null) return;
+            try {
+                if (success != null) success.accept(value);
+            } catch (final Throwable error) {
+                handleFailure(error, failure);
+            }
+        });
+    }
+
+    /**
+     * Queues this action and invokes the provided success callback only if the completed value is present (not null).
+     *
+     * @param success the success callback, or {@code null} to ignore a present value
+     */
+    public void ifPresent(@Nullable Consumer<? super T> success) {
+        ifPresent(success, getDefaultFailure());
+    }
+
+    /**
+     * Blocks until this action completes and returns the result.
+     *
+     * @return the completed result, or {@code null} if {@link #onErrorReturnNull()} is used
+     * @throws EAHttpRequestException if the action fails with a checked/transport-style failure
+     */
     public T complete() {
         try {
             return submit().join();
@@ -96,11 +161,25 @@ public class EAAction<T> {
         }
     }
 
+    /**
+     * Transforms a successful result into another value.
+     *
+     * @param mapper the success-value mapper
+     * @param <R> the mapped result type
+     * @return a new mapped action
+     */
     @NotNull
     public <R> EAAction<R> map(@NotNull Function<? super T, ? extends R> mapper) {
-        return new EAAction<>(description + " -> map", ignored -> submit().thenApply(mapper), null);
+        return new EAAction<>(description + " -> map", ignored -> submit().thenApply(mapper));
     }
 
+    /**
+     * Chains another action that depends on this action's successful result.
+     *
+     * @param mapper the action factory for the successful result
+     * @param <R> the downstream result type
+     * @return a new flat-mapped action
+     */
     @NotNull
     public <R> EAAction<R> flatMap(@NotNull Function<? super T, ? extends EAAction<? extends R>> mapper) {
         return new EAAction<>(description + " -> flatMap", ignored -> submit().thenCompose(value -> {
@@ -118,9 +197,15 @@ public class EAAction<T> {
                 return failed;
             }
             return (CompletableFuture<R>) action.submit();
-        }), null);
+        }));
     }
 
+    /**
+     * Registers a success tap that observes the completed value without changing it.
+     *
+     * @param callback the success callback
+     * @return a new action with the success tap applied
+     */
     @NotNull
     public EAAction<T> onSuccess(@NotNull Consumer<? super T> callback) {
         return new EAAction<>(description + " -> onSuccess", ignored -> {
@@ -139,14 +224,26 @@ public class EAAction<T> {
                 }
             });
             return future;
-        }, null);
+        });
     }
 
+    /**
+     * Registers a success tap that runs without needing the completed value.
+     *
+     * @param callback the success callback
+     * @return a new action with the success tap applied
+     */
     @NotNull
     public EAAction<T> onSuccess(@NotNull Runnable callback) {
         return onSuccess(value -> callback.run());
     }
 
+    /**
+     * Registers an error tap that observes failures without changing the failure result.
+     *
+     * @param callback the error callback
+     * @return a new action with the error tap applied
+     */
     @NotNull
     public EAAction<T> onError(@NotNull Consumer<? super Throwable> callback) {
         return new EAAction<>(description + " -> onError", ignored -> {
@@ -166,19 +263,38 @@ public class EAAction<T> {
                 }
             });
             return future;
-        }, null);
+        });
     }
 
+    /**
+     * Registers an error tap that runs without needing the thrown value.
+     *
+     * @param callback the error callback
+     * @return a new action with the error tap applied
+     */
     @NotNull
     public EAAction<T> onError(@NotNull Runnable callback) {
         return onError(throwable -> callback.run());
     }
 
+    /**
+     * Transforms a failure into a success value.
+     *
+     * @param mapper the error-to-value mapper
+     * @return a new action with error mapping applied
+     */
     @NotNull
     public EAAction<T> onErrorMap(@NotNull Function<? super Throwable, ? extends T> mapper) {
         return onErrorMap(throwable -> true, mapper);
     }
 
+    /**
+     * Transforms matching failures into a success value.
+     *
+     * @param filter the failure filter
+     * @param mapper the error-to-value mapper
+     * @return a new action with filtered error mapping applied
+     */
     @NotNull
     public EAAction<T> onErrorMap(@NotNull Predicate<? super Throwable> filter, @NotNull Function<? super Throwable, ? extends T> mapper) {
         return new EAAction<>(description + " -> onErrorMap", ignored -> {
@@ -201,29 +317,58 @@ public class EAAction<T> {
                 }
             });
             return future;
-        }, null);
+        });
     }
 
+    /**
+     * Replaces any failure with a fixed success value.
+     *
+     * @param value the fallback value
+     * @return a new action that returns the fallback on failure
+     */
     @NotNull
     public EAAction<T> onErrorReturn(@NotNull T value) {
         return onErrorMap(throwable -> value);
     }
 
+    /**
+     * Replaces any failure with an empty list.
+     *
+     * @return a new action that returns an empty list on failure
+     */
     @NotNull
     public EAAction<T> onErrorReturnEmptyList() {
         return onErrorMap(throwable -> (T) Collections.emptyList());
     }
 
+    /**
+     * Replaces any failure with {@code null}.
+     *
+     * @return a new action that returns {@code null} on failure
+     */
     @NotNull
     public EAAction<T> onErrorReturnNull() {
         return onErrorMap(throwable -> null);
     }
 
+    /**
+     * Transforms a failure into another action.
+     *
+     * @param mapper the failure-to-action mapper
+     * @return a new action with error flat-mapping applied
+     */
     @NotNull
     public EAAction<T> onErrorFlatMap(@NotNull Function<? super Throwable, ? extends EAAction<? extends T>> mapper) {
         return onErrorFlatMap(throwable -> true, mapper);
     }
 
+    /**
+     * Transforms matching failures into another action.
+     *
+     * @param filter the failure filter
+     * @param mapper the failure-to-action mapper
+     * @return a new action with filtered error flat-mapping applied
+     */
     @NotNull
     public EAAction<T> onErrorFlatMap(@NotNull Predicate<? super Throwable> filter, @NotNull Function<? super Throwable, ? extends EAAction<? extends T>> mapper) {
         return new EAAction<>(description + " -> onErrorFlatMap", ignored -> {
@@ -258,23 +403,43 @@ public class EAAction<T> {
                 }
             });
             return future;
-        }, null);
+        });
     }
 
+    /**
+     * Delays execution by the given amount of time.
+     *
+     * @param delay the delay amount
+     * @param unit the delay unit
+     * @return a delayed action
+     */
     @NotNull
     public EAAction<T> delay(long delay, @NotNull TimeUnit unit) {
-        return new EAAction<>(description + " -> delay", ignored -> delayed(delay, unit).thenCompose(unused -> submit()), null);
+        return new EAAction<>(description + " -> delay", ignored -> delayed(delay, unit).thenCompose(unused -> submit()));
     }
 
+    /**
+     * Delays execution by the given duration.
+     *
+     * @param duration the delay duration
+     * @return a delayed action
+     */
     @NotNull
     public EAAction<T> delay(@NotNull Duration duration) {
         return delay(duration.toMillis(), TimeUnit.MILLISECONDS);
     }
 
+    /**
+     * Fails the action if it does not complete within the given timeout.
+     *
+     * @param timeout the timeout amount
+     * @param unit the timeout unit
+     * @return a timeout-wrapped action
+     */
     @NotNull
     public EAAction<T> timeout(long timeout, @NotNull TimeUnit unit) {
         final long timeoutMillis = unit.toMillis(timeout);
-        return new EAAction<>(description + " -> timeout", ignored -> withTimeout(submit(), timeoutMillis), null);
+        return new EAAction<>(description + " -> timeout", ignored -> withTimeout(submit(), timeoutMillis));
     }
 
     @NotNull
@@ -318,29 +483,6 @@ public class EAAction<T> {
     }
 
     @NotNull
-    private CompletableFuture<T> applyRecovery(@NotNull CompletableFuture<T> source) {
-        final CompletableFuture<T> result = new CompletableFuture<>();
-        source.whenComplete((value, throwable) -> {
-            if (throwable == null) {
-                result.complete(value);
-                return;
-            }
-
-            final Throwable cause = unwrap(throwable);
-            try {
-                if (cause instanceof Error || recovery == null) {
-                    result.completeExceptionally(cause);
-                    return;
-                }
-                result.complete(recovery.apply(cause));
-            } catch (final Throwable error) {
-                result.completeExceptionally(appendCause(error, cause));
-            }
-        });
-        return result;
-    }
-
-    @NotNull
     private static Throwable unwrap(@NotNull Throwable throwable) {
         if (throwable instanceof CompletionException) {
             final Throwable cause = throwable.getCause();
@@ -365,17 +507,20 @@ public class EAAction<T> {
     }
 
     private void handleFailure(@NotNull Throwable throwable, @Nullable Consumer<? super Throwable> failure) {
-        if (failure != null) {
-            try {
-                failure.accept(throwable);
-            } catch (final Throwable callbackError) {
-                if (callbackError instanceof Error) throw (Error) callbackError;
-                throw (RuntimeException) callbackError;
-            }
-            return;
+        if (failure == null) return;
+        try {
+            failure.accept(throwable);
+        } catch (final Throwable callbackError) {
+            if (callbackError instanceof Error) throw (Error) callbackError;
+            throw (RuntimeException) callbackError;
         }
+    }
 
-        LOGGER.log(Level.SEVERE, "Unhandled failure while executing " + description, throwable);
-        if (throwable instanceof Error) throw (Error) throwable;
+    @NotNull
+    public Consumer<? super Throwable> getDefaultFailure() {
+        return t -> {
+            LOGGER.log(Level.SEVERE, "Unhandled failure while executing " + description, t);
+            if (t instanceof Error) throw (Error) t;
+        };
     }
 }

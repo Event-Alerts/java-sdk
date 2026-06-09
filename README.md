@@ -13,7 +13,7 @@ Java models, HTTP client, and websocket helpers for the Event Alerts API.
 - `GSONProvider.GSON` includes adapters for `Date`, `UUID`, `ObjectId`, enums, primitive wrappers, and sets
 - API models live under `gg.eventalerts.sdk.object`
 - `EAHTTP` wraps the API's HTTP endpoints and returns action objects with `complete()` and `queue()`
-- HTTP actions support JDA-style composition with `map(...)`, `flatMap(...)`, `recoverWithEmptyList()`, and `recoverWithNull()`
+- HTTP actions support JDA-style composition with `map(...)`, `flatMap(...)`, `onSuccess(...)`, `onError(...)`, `onErrorMap(...)`, and `onErrorReturn*()` helpers
 - `EAWebSocket` handles websocket connection setup, event dispatch, and action sending
 - Typed websocket envelopes are available through `SocketEvent<T>` and `SocketAction<T>`
 
@@ -97,11 +97,12 @@ public class Main {
                 event -> System.out.println("Loaded event: " + event.title),
                 error -> System.err.println("Failed to load event: " + error.getMessage()));
 
-        // Recover-with HTTP example
+        // HTTP composition example
         http.events.retrieveMany()
-                .recoverWithEmptyList() // If an error occurs, events will just be an empty list
+                .onErrorReturnEmptyList()
                 .map(events -> events.size())
-                .queue(size -> System.out.println("Loaded events: " + size));
+                .onSuccess(size -> System.out.println("Loaded events: " + size))
+                .queue();
 
         // Websocket example
         final EAWebSocket socket = new EAWebSocket.Builder("EventAlertsExample/1.0")
@@ -153,6 +154,26 @@ Contains `EAHTTP`, the shared `EAAction` type, and the typed endpoint wrappers:
 - `EAPartnerServers`
 - `EAPlayers`
 - `EAServerApplications`
+
+#### HTTP actions
+
+`EAAction<T>` is async-first:
+
+- `submit()` returns a `CompletableFuture<T>`
+- `queue()` schedules the action and optionally accepts success and failure callbacks
+- `complete()` blocks and returns the final value
+
+Composition helpers:
+
+- `map(...)` and `flatMap(...)` transform or chain successful results
+- `onSuccess(...)` and `onError(...)` are side-effect taps
+- `onErrorMap(...)` and `onErrorFlatMap(...)` convert failures into alternate values or actions
+- `onErrorReturn(...)`, `onErrorReturnEmptyList()`, and `onErrorReturnNull()` are the explicit fallback helpers used by HTTP retrieval actions
+
+The default HTTP retrieval helpers are fail-fast:
+
+- `retrieveMany(...)` and `retrieveOne(...)` throw on failure unless you add a fallback helper
+- use `onErrorReturnEmptyList()` or `onErrorReturnNull()` when you want the empty/null convenience behavior
 
 ### Websocket: `gg.eventalerts.sdk.websocket`
 
