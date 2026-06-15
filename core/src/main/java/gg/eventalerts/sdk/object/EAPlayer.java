@@ -21,13 +21,13 @@ public class EAPlayer extends EAObject {
 
     public EAPlayer() {}
 
-    public EAPlayer(@Nullable ObjectId id, @Nullable Discord discord, @Nullable Minecraft minecraft, @Nullable LinkMethod linkMethod, @Nullable Set<Integer> anniversaries, @Nullable Set<Long> boosterPasses, @Nullable ObjectId defaultPreset, @Nullable Double rating, @Nullable Subscription subscription) {
+    public EAPlayer(@Nullable ObjectId id, @Nullable Discord discord, @Nullable Minecraft minecraft, @Nullable LinkMethod linkMethod, @Nullable Collection<Integer> anniversaries, @Nullable Collection<Long> boosterPasses, @Nullable ObjectId defaultPreset, @Nullable Double rating, @Nullable Subscription subscription) {
         this.id = id;
         this.discord = discord;
         this.minecraft = minecraft;
         this.linkMethod = linkMethod;
-        this.anniversaries = anniversaries;
-        this.boosterPasses = boosterPasses;
+        this.anniversaries = anniversaries == null ? null : new HashSet<>(anniversaries);
+        this.boosterPasses = boosterPasses == null ? null : new HashSet<>(boosterPasses);
         this.defaultPreset = defaultPreset;
         this.rating = rating;
         this.subscription = subscription;
@@ -57,7 +57,7 @@ public class EAPlayer extends EAObject {
                 Discord.getExample(),
                 Minecraft.getExample(),
                 EAPlayer.LinkMethod.MICROSOFT_OAUTH,
-                new HashSet<>(Arrays.asList(2024, 2025)),
+                Arrays.asList(2024, 2025),
                 Collections.singleton(ExampleUtility.User.OIIINK_ID),
                 new ObjectId(),
                 4.5,
@@ -132,7 +132,7 @@ public class EAPlayer extends EAObject {
 
         public Subscription() {}
 
-        public Subscription(@NotNull EAPlayer.Subscription.Tier tier, @Nullable List<Long> servers) {
+        public Subscription(@Nullable EAPlayer.Subscription.Tier tier, @Nullable List<Long> servers) {
             this.tier = tier;
             this.servers = servers;
         }

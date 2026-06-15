@@ -18,7 +18,7 @@ public class EAEvents extends EAEndpoint<EAEvent> {
     }
 
     @Override @NotNull
-    public Class<EAEvent> getObjectClass() {
+    public Class<EAEvent> getObjectType() {
         return EAEvent.class;
     }
 

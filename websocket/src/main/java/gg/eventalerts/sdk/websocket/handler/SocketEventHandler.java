@@ -7,15 +7,10 @@ import gg.eventalerts.sdk.websocket.SocketEventName;
 import gg.eventalerts.sdk.websocket.message.event.SocketEvent;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Type;
 
-
-public abstract class SocketHandler<O extends EAObject> {
+public abstract class SocketEventHandler<O extends EAObject> {
     @NotNull
     public abstract SocketEventName getName();
-
-    @NotNull
-    public abstract Class<O> getObjectClass();
 
     public boolean shouldSubscribe() {
         return true;
@@ -24,8 +19,7 @@ public abstract class SocketHandler<O extends EAObject> {
     public abstract void onMessage(@NotNull SocketEvent<O> object);
 
     public final void onMessage(@NotNull JsonObject json) {
-        final Type type = GSONProvider.typeOf(SocketEvent.class, getObjectClass());
-        final SocketEvent<O> event = GSONProvider.GSON.fromJson(json, type);
+        final SocketEvent<O> event = GSONProvider.GSON.fromJson(json, GSONProvider.typeOf(SocketEvent.class, getName().getObjectType()));
         if (event != null) onMessage(event);
     }
 }

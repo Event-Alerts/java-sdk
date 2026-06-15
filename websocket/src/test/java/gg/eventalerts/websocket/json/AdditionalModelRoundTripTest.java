@@ -43,7 +43,7 @@ class AdditionalModelRoundTripTest {
 
         final SocketEvent<EAPlayer> eventEnvelope = new SocketEvent<>(
                 SocketEventName.LINK,
-                7,
+                7L,
                 player);
         final SocketAction<EAPlayerConnectionAction> actionEnvelope = new SocketAction<>(
                 SocketActionName.PLAYER_CONNECTION,

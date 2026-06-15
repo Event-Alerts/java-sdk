@@ -67,17 +67,17 @@ class AdditionalModelRoundTripTest {
         final EAEvent event = EAEvent.getExample();
         final EAEventThreadMessage original = new EAEventThreadMessage(
                 event,
-                new EAEventThreadMessage.Channel(123, "event-thread"),
+                new EAEventThreadMessage.Channel(123L, "event-thread"),
                 new EAEventThreadMessage.Author(
-                        456,
+                        456L,
                         "tester",
                         "Tester",
                         EAPlayer.getExample()),
                 new EAEventThreadMessage.Message(
-                        789,
+                        789L,
                         new EAEventThreadMessage.Message.Content("raw", "display", "stripped"),
                         Collections.singletonList(new EAEventThreadMessage.Message.Attachment(
-                                321,
+                                321L,
                                 "file.png",
                                 "https://example.invalid/file.png",
                                 "https://proxy.invalid/file.png"))));

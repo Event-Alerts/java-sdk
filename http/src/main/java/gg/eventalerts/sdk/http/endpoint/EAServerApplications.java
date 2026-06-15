@@ -16,7 +16,7 @@ public class EAServerApplications extends EAEndpoint<EAServerApplication> {
     }
 
     @Override @NotNull
-    public Class<EAServerApplication> getObjectClass() {
+    public Class<EAServerApplication> getObjectType() {
         return EAServerApplication.class;
     }
 }

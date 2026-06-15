@@ -5,14 +5,9 @@ import gg.eventalerts.sdk.websocket.message.event.EACrossBanEvent;
 import org.jetbrains.annotations.NotNull;
 
 
-public abstract class CrossBanHandler extends SocketHandler<EACrossBanEvent> {
+public abstract class CrossBanHandler extends SocketEventHandler<EACrossBanEvent> {
     @Override @NotNull
     public SocketEventName getName() {
         return SocketEventName.CROSS_BAN;
-    }
-
-    @Override @NotNull
-    public Class<EACrossBanEvent> getObjectClass() {
-        return EACrossBanEvent.class;
     }
 }

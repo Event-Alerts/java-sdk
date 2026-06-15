@@ -27,22 +27,26 @@ public class EAPartnerServer extends EAObject {
 
     public EAPartnerServer() {}
 
-    public EAPartnerServer(@Nullable ObjectId id, @Nullable Long serverId, @Nullable Date created, @Nullable Set<Long> representatives, @Nullable Date enabled, @Nullable String name, @Nullable String description, @Nullable String invite, @Nullable Set<Tag> tags, @Nullable Integer color, @Nullable String thumbnail, @Nullable Long message, @Nullable Map<Long, Integer> gets, @Nullable DisableData disableData, @Nullable String apiKey) {
+    public EAPartnerServer(@Nullable ObjectId id, @Nullable Long serverId, @Nullable Date created, @Nullable Collection<Long> representatives, @Nullable Date enabled, @Nullable String name, @Nullable String description, @Nullable String invite, @Nullable Collection<Tag> tags, @Nullable Integer color, @Nullable String thumbnail, @Nullable Long message, @Nullable Map<Long, Integer> gets, @Nullable DisableData disableData, @Nullable String apiKey) {
         this.id = id;
         this.serverId = serverId;
         this.created = created;
-        this.representatives = representatives;
+        this.representatives = representatives == null ? null : new HashSet<>(representatives);
         this.enabled = enabled;
         this.name = name;
         this.description = description;
         this.invite = invite;
-        this.tags = tags;
+        this.tags = tags == null ? null : new HashSet<>(tags);
         this.color = color;
         this.thumbnail = thumbnail;
         this.message = message;
         this.gets = gets;
         this.disableData = disableData;
         this.apiKey = apiKey;
+    }
+
+    public EAPartnerServer(@NotNull EAPartnerServer partnerServer) {
+        this(partnerServer.id, partnerServer.serverId, partnerServer.created, partnerServer.representatives, partnerServer.enabled, partnerServer.name, partnerServer.description, partnerServer.invite, partnerServer.tags, partnerServer.color, partnerServer.thumbnail, partnerServer.message, partnerServer.gets, partnerServer.disableData, partnerServer.apiKey);
     }
 
     @Override
@@ -67,12 +71,12 @@ public class EAPartnerServer extends EAObject {
                 new ObjectId(),
                 ExampleUtility.Guild.EVENT_ALERTS_ID,
                 new Date(),
-                new HashSet<>(Arrays.asList(ExampleUtility.User.SRNYX_ID, ExampleUtility.User.OIIINK_ID)),
+                Arrays.asList(ExampleUtility.User.SRNYX_ID, ExampleUtility.User.OIIINK_ID),
                 null,
                 "Example Server",
                 "This is an example partner server.",
                 "skeppy",
-                new HashSet<>(Arrays.asList(Tag.FUN, Tag.PVP)),
+                Arrays.asList(Tag.FUN, Tag.PVP),
                 0xFF5733,
                 "https://us-east-1.tixte.net/uploads/img.venox.network/bee.png",
                 null,

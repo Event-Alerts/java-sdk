@@ -44,33 +44,37 @@ public class EAEvent extends EAObject {
 
     public EAEvent() {}
 
-    public EAEvent(@Nullable ObjectId id, @Nullable Type type, @Nullable Long channel, @Nullable Long message, @Nullable Long controlPanel, @Nullable Cancellation cancellation, @Nullable Set<Review> reviews, @Nullable Boolean custom, @Nullable Date created, @Nullable String title, @Nullable Long host, @Nullable String description, @Nullable Set<Long> roles, @Nullable Set<PingRole> rolesNamed, @Nullable ObjectId server, @Nullable Media media, @Nullable Source source, @Nullable Mode mode, @Nullable String ip, @Nullable Set<Platform> platforms, @Nullable String platform, @Nullable String version, @Nullable String prize, @Nullable Integer maxPlayers, @Nullable Date time, @Nullable Set<Long> subscribers) {
+    public EAEvent(@Nullable ObjectId id, @Nullable Type type, @Nullable Long channel, @Nullable Long message, @Nullable Long controlPanel, @Nullable Cancellation cancellation, @Nullable Collection<Review> reviews, @Nullable Boolean custom, @Nullable Date created, @Nullable String title, @Nullable Long host, @Nullable String description, @Nullable Collection<Long> roles, @Nullable Collection<PingRole> rolesNamed, @Nullable ObjectId server, @Nullable Media media, @Nullable Source source, @Nullable Mode mode, @Nullable String ip, @Nullable Collection<Platform> platforms, @Nullable String platform, @Nullable String version, @Nullable String prize, @Nullable Integer maxPlayers, @Nullable Date time, @Nullable Collection<Long> subscribers) {
         this.id = id;
         this.type = type;
         this.channel = channel;
         this.message = message;
         this.controlPanel = controlPanel;
         this.cancellation = cancellation;
-        this.reviews = reviews;
+        this.reviews = reviews == null ? null : new HashSet<>(reviews);
         this.custom = custom;
         this.created = created;
         this.title = title;
         this.host = host;
         this.description = description;
-        this.roles = roles;
-        this.rolesNamed = rolesNamed;
+        this.roles = roles == null ? null : new HashSet<>(roles);
+        this.rolesNamed = rolesNamed == null ? null : new HashSet<>(rolesNamed);
         this.server = server;
         this.media = media;
         this.source = source;
         this.mode = mode;
         this.ip = ip;
-        this.platforms = platforms;
+        this.platforms = platforms == null ? null : new HashSet<>(platforms);
         this.platform = platform;
         this.version = version;
         this.prize = prize;
         this.maxPlayers = maxPlayers;
         this.time = time;
-        this.subscribers = subscribers;
+        this.subscribers = subscribers == null ? null : new HashSet<>(subscribers);
+    }
+
+    public EAEvent(@NotNull EAEvent event) {
+        this(event.id, event.type, event.channel, event.message, event.controlPanel, event.cancellation, event.reviews, event.custom, event.created, event.title, event.host, event.description, event.roles, event.rolesNamed, event.server, event.media, event.source, event.mode, event.ip, event.platforms, event.platform, event.version, event.prize, event.maxPlayers, event.time, event.subscribers);
     }
 
     @Override
@@ -101,8 +105,8 @@ public class EAEvent extends EAObject {
                 "Example Event",
                 ExampleUtility.User.SRNYX_ID,
                 "This is an example event description.",
-                new HashSet<>(Arrays.asList(ExampleUtility.Role.PARTNER_EVENTS_ID, ExampleUtility.Role.MONEY_EVENTS_ID)),
-                new HashSet<>(Arrays.asList(PingRole.PARTNER, PingRole.MONEY)),
+                Arrays.asList(ExampleUtility.Role.PARTNER_EVENTS_ID, ExampleUtility.Role.MONEY_EVENTS_ID),
+                Arrays.asList(PingRole.PARTNER, PingRole.MONEY),
                 new ObjectId(),
                 Media.getExample(),
                 Source.DISCORD,
@@ -114,7 +118,7 @@ public class EAEvent extends EAObject {
                 "$10 USD",
                 100,
                 new Date(),
-                new HashSet<>(Arrays.asList(ExampleUtility.User.RAME_ID, ExampleUtility.User.REECE_ID)));
+                Arrays.asList(ExampleUtility.User.RAME_ID, ExampleUtility.User.REECE_ID));
     }
 
     @Nullable
@@ -148,11 +152,14 @@ public class EAEvent extends EAObject {
         CIVILIZATION("Civilization", true);
 
         @NotNull public final String displayName;
-        public final boolean partnerPingable;
+        /**
+         * Whether this role can be toggled by Partners for their events
+         */
+        public final boolean partnerToggleable;
 
-        PingRole(@NotNull String displayName, boolean partnerPingable) {
+        PingRole(@NotNull String displayName, boolean partnerToggleable) {
             this.displayName = displayName;
-            this.partnerPingable = partnerPingable;
+            this.partnerToggleable = partnerToggleable;
         }
 
         PingRole(@NotNull String displayName) {
@@ -199,6 +206,10 @@ public class EAEvent extends EAObject {
             this.reason = reason;
         }
 
+        public Cancellation(@NotNull EAEvent.Cancellation cancellation) {
+            this(cancellation.timestamp, cancellation.user, cancellation.reason);
+        }
+
         @NotNull
         public static Cancellation getExample() {
             return new Cancellation(
@@ -216,11 +227,15 @@ public class EAEvent extends EAObject {
 
         public Review() {}
 
-        public Review(long reviewer, @NotNull Date timestamp, @NotNull String comments, @NotNull Map<Category, Integer> categories) {
+        public Review(@Nullable Long reviewer, @Nullable Date timestamp, @Nullable String comments, @Nullable Map<Category, Integer> categories) {
             this.reviewer = reviewer;
             this.timestamp = timestamp;
             this.comments = comments;
             this.categories = categories;
+        }
+
+        public Review(@NotNull EAEvent.Review review) {
+            this(review.reviewer, review.timestamp, review.comments, review.categories);
         }
 
         public enum Category {
@@ -249,9 +264,13 @@ public class EAEvent extends EAObject {
 
         public Media() {}
 
-        public Media(@NotNull String url, @NotNull String name) {
+        public Media(@Nullable String url, @Nullable String name) {
             this.url = url;
             this.name = name;
+        }
+
+        public Media(@NotNull EAEvent.Media media) {
+            this(media.url, media.name);
         }
 
         @NotNull

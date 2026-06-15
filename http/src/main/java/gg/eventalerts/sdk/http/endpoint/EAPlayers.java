@@ -19,7 +19,7 @@ public class EAPlayers extends EAEndpoint<EAPlayer> {
     }
 
     @Override @NotNull
-    public Class<EAPlayer> getObjectClass() {
+    public Class<EAPlayer> getObjectType() {
         return EAPlayer.class;
     }
 

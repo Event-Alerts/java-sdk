@@ -19,7 +19,7 @@ public class EACrossBans extends EAEndpoint<EACrossBan> {
     }
 
     @Override @NotNull
-    public Class<EACrossBan> getObjectClass() {
+    public Class<EACrossBan> getObjectType() {
         return EACrossBan.class;
     }
 

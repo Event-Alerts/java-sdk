@@ -6,7 +6,7 @@ import gg.eventalerts.sdk.json.GSONProvider;
 import gg.eventalerts.sdk.object.EAObject;
 import gg.eventalerts.sdk.websocket.message.action.SocketAction;
 import gg.eventalerts.sdk.websocket.message.action.EAUpdateSubscriptionAction;
-import gg.eventalerts.sdk.websocket.handler.SocketHandler;
+import gg.eventalerts.sdk.websocket.handler.SocketEventHandler;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.framing.CloseFrame;
 import org.java_websocket.handshake.ServerHandshake;
@@ -33,7 +33,7 @@ public class EAWebSocket extends WebSocketClient {
     });
 
     // Handlers
-    @NotNull private final Map<SocketEventName, Set<SocketHandler<?>>> handlers = new HashMap<>();
+    @NotNull private final Map<SocketEventName, Set<SocketEventHandler<?>>> handlers = new HashMap<>();
 
     // Options
     public boolean retry;
@@ -49,11 +49,11 @@ public class EAWebSocket extends WebSocketClient {
     @Nullable public Date lastMessageSentAt;
     @Nullable public Date lastMessageReceivedAt;
 
-    private EAWebSocket(@NotNull String url, @NotNull Map<String, String> headers, @NotNull Set<SocketHandler<?>> handlers, boolean retry, @NotNull Duration retryDelay) {
+    private EAWebSocket(@NotNull String url, @NotNull Map<String, String> headers, @NotNull Set<SocketEventHandler<?>> handlers, boolean retry, @NotNull Duration retryDelay) {
         super(URI.create(url), headers);
 
         // Register handlers
-        for (final SocketHandler<?> handler : handlers) {
+        for (final SocketEventHandler<?> handler : handlers) {
             this.handlers.computeIfAbsent(handler.getName(), k -> new HashSet<>()).add(handler);
         }
 
@@ -74,8 +74,8 @@ public class EAWebSocket extends WebSocketClient {
         // Get subscriptions
         final Set<SocketEventName> subscribe = new HashSet<>();
         final Set<SocketEventName> unsubscribe = new HashSet<>();
-        for (final Map.Entry<SocketEventName, Set<SocketHandler<?>>> entry : handlers.entrySet()) {
-            if (entry.getValue().stream().anyMatch(SocketHandler::shouldSubscribe)) {
+        for (final Map.Entry<SocketEventName, Set<SocketEventHandler<?>>> entry : handlers.entrySet()) {
+            if (entry.getValue().stream().anyMatch(SocketEventHandler::shouldSubscribe)) {
                 subscribe.add(entry.getKey());
             } else {
                 unsubscribe.add(entry.getKey());
@@ -133,7 +133,7 @@ public class EAWebSocket extends WebSocketClient {
         lastMessageSentAt = new Date();
 
         // Send
-        send(GSONProvider.GSON.toJson(action, GSONProvider.typeOf(SocketAction.class, name.objectType)));
+        send(action.toString());
 
         // After send
         afterSend(name, action);
@@ -163,7 +163,7 @@ public class EAWebSocket extends WebSocketClient {
             LOGGER.warn("Received JSON with invalid event: {}", message);
             return;
         }
-        final Set<SocketHandler<?>> handlers = eventName == null ? null : this.handlers.get(eventName);
+        final Set<SocketEventHandler<?>> handlers = eventName == null ? null : this.handlers.get(eventName);
         if (handlers == null) {
             LOGGER.warn("Received JSON with invalid event: {}", message);
             return;
@@ -178,7 +178,7 @@ public class EAWebSocket extends WebSocketClient {
         lastMessageReceivedAt = new Date();
 
         // Handle
-        for (final SocketHandler<?> handler : handlers) handler.onMessage(json);
+        for (final SocketEventHandler<?> handler : handlers) handler.onMessage(json);
     }
 
     @Override
@@ -214,7 +214,7 @@ public class EAWebSocket extends WebSocketClient {
 
         // Optional
         @NotNull private String url = "wss://eventalerts.gg/api/v1/socket";
-        @NotNull private final Set<SocketHandler<?>> handlers = new HashSet<>();
+        @NotNull private final Set<SocketEventHandler<?>> handlers = new HashSet<>();
         private boolean retry = true;
         @NotNull private Duration retryDelay = Duration.ofMinutes(5);
         @Nullable private String bearerToken;
@@ -233,7 +233,7 @@ public class EAWebSocket extends WebSocketClient {
         }
 
         @NotNull
-        public Builder handler(@NotNull SocketHandler<?>... handlers) {
+        public Builder handler(@NotNull SocketEventHandler<?>... handlers) {
             this.handlers.addAll(Arrays.asList(handlers));
             return this;
         }

@@ -225,7 +225,7 @@ class EAActionTest {
 
     @Test
     void onSuccessCallbackFailurePropagates() {
-        final EAAction<Integer> action = new EAAction<Integer>("base", () -> 5)
+        final EAAction<Integer> action = new EAAction<>("base", () -> 5)
                 .onSuccess(value -> {
                     throw new IllegalStateException("callback");
                 });

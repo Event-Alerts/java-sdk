@@ -14,11 +14,15 @@ public class EAEventThreadMessage extends EAObject {
 
     public EAEventThreadMessage() {}
 
-    public EAEventThreadMessage(@NotNull EAEvent event, @NotNull Channel channel, @NotNull Author author, @NotNull EAEventThreadMessage.Message message) {
+    public EAEventThreadMessage(@Nullable EAEvent event, @Nullable Channel channel, @Nullable Author author, @Nullable EAEventThreadMessage.Message message) {
         this.event = event;
         this.channel = channel;
         this.author = author;
         this.message = message;
+    }
+
+    public EAEventThreadMessage(@NotNull EAEventThreadMessage eventThreadMessage) {
+        this(eventThreadMessage.event, eventThreadMessage.channel, eventThreadMessage.author, eventThreadMessage.message);
     }
 
     public static class Channel extends EAObject{
@@ -27,9 +31,13 @@ public class EAEventThreadMessage extends EAObject {
 
         public Channel() {}
 
-        public Channel(long id, @NotNull String name) {
+        public Channel(@Nullable Long id, @Nullable String name) {
             this.id = id;
             this.name = name;
+        }
+
+        public Channel(@NotNull EAEventThreadMessage.Channel channel) {
+            this(channel.id, channel.name);
         }
     }
 
@@ -41,11 +49,15 @@ public class EAEventThreadMessage extends EAObject {
 
         public Author() {}
 
-        public Author(long id, @NotNull String name, @NotNull String effectiveName, @Nullable EAPlayer player) {
+        public Author(@Nullable Long id, @Nullable String name, @Nullable String effectiveName, @Nullable EAPlayer player) {
             this.id = id;
             this.name = name;
             this.effectiveName = effectiveName;
             this.player = player;
+        }
+
+        public Author(@NotNull EAEventThreadMessage.Author author) {
+            this(author.id, author.name, author.effectiveName, author.player);
         }
     }
 
@@ -56,10 +68,14 @@ public class EAEventThreadMessage extends EAObject {
 
         public Message() {}
 
-        public Message(long id, @NotNull Content content, @NotNull List<Attachment> attachments) {
+        public Message(@Nullable Long id, @Nullable Content content, @Nullable List<Attachment> attachments) {
             this.id = id;
             this.content = content;
             this.attachments = attachments;
+        }
+
+        public Message(@NotNull EAEventThreadMessage.Message message) {
+            this(message.id, message.content, message.attachments);
         }
 
         public static class Content extends EAObject {
@@ -69,10 +85,14 @@ public class EAEventThreadMessage extends EAObject {
 
             public Content() {}
 
-            public Content(@NotNull String raw, @NotNull String display, @NotNull String stripped) {
+            public Content(@Nullable String raw, @Nullable String display, @Nullable String stripped) {
                 this.raw = raw;
                 this.display = display;
                 this.stripped = stripped;
+            }
+
+            public Content(@NotNull EAEventThreadMessage.Message.Content content) {
+                this(content.raw, content.display, content.stripped);
             }
         }
 
@@ -84,11 +104,15 @@ public class EAEventThreadMessage extends EAObject {
 
             public Attachment() {}
 
-            public Attachment(long id, @NotNull String name, @NotNull String url, @NotNull String proxyUrl) {
+            public Attachment(@Nullable Long id, @Nullable String name, @Nullable String url, @Nullable String proxyUrl) {
                 this.id = id;
                 this.name = name;
                 this.url = url;
                 this.proxyUrl = proxyUrl;
+            }
+
+            public Attachment(@NotNull EAEventThreadMessage.Message.Attachment attachment) {
+                this(attachment.id, attachment.name, attachment.url, attachment.proxyUrl);
             }
         }
     }

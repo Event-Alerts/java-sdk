@@ -38,7 +38,7 @@ public abstract class EAEndpoint<O extends EAObject> {
     public abstract String getPath();
 
     @NotNull
-    public abstract Class<O> getObjectClass();
+    public abstract Class<O> getObjectType();
 
     @NotNull
     public EAAction<List<O>> retrieveMany(@Nullable Map<String, Object> queryParams) {
@@ -122,7 +122,7 @@ public abstract class EAEndpoint<O extends EAObject> {
             connection = details.connection;
 
             // Parse objects
-            final List<O> objects = GSONProvider.GSON.fromJson(details.raw, GSONProvider.typeOf(List.class, getObjectClass()));
+            final List<O> objects = GSONProvider.GSON.fromJson(details.raw, GSONProvider.typeOf(List.class, getObjectType()));
             return objects != null ? objects : Collections.emptyList();
         } catch (final RuntimeException e) {
             throw e;
@@ -144,7 +144,7 @@ public abstract class EAEndpoint<O extends EAObject> {
             connection = details.connection;
 
             // Parse object
-            final O object = GSONProvider.GSON.fromJson(details.raw, getObjectClass());
+            final O object = GSONProvider.GSON.fromJson(details.raw, getObjectType());
             if (object == null) throw new EAHttpResponseException(details.statusCode, "Failed to parse object field '" + objectField + "'", details.body);
             return object;
         } catch (final RuntimeException e) {

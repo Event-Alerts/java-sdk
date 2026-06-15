@@ -1,18 +1,18 @@
 package gg.eventalerts.sdk.object;
 
 import gg.eventalerts.sdk.ExampleUtility;
-import org.bson.types.ObjectId;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
 
 public class EAServerApplication extends EAObject {
-    @Nullable public ObjectId id;
+    @Nullable public Long id;
     @Nullable public Long applicant;
     @Nullable public Long channel;
     @Nullable public Date created;
@@ -22,7 +22,7 @@ public class EAServerApplication extends EAObject {
 
     public EAServerApplication() {}
 
-    public EAServerApplication(@Nullable ObjectId id, @Nullable Long applicant, @Nullable Long channel, @Nullable Date created, @Nullable Long message, @Nullable ApprovedBy approvedBy, @Nullable Data data) {
+    public EAServerApplication(@Nullable Long id, @Nullable Long applicant, @Nullable Long channel, @Nullable Date created, @Nullable Long message, @Nullable ApprovedBy approvedBy, @Nullable Data data) {
         this.id = id;
         this.applicant = applicant;
         this.channel = channel;
@@ -32,10 +32,14 @@ public class EAServerApplication extends EAObject {
         this.data = data;
     }
 
+    public EAServerApplication(@NotNull EAServerApplication serverApplication) {
+        this(serverApplication.id, serverApplication.applicant, serverApplication.channel, serverApplication.created, serverApplication.message, serverApplication.approvedBy, serverApplication.data);
+    }
+
     @NotNull
     public static EAServerApplication getExample() {
         return new EAServerApplication(
-                new ObjectId(),
+                ExampleUtility.Random.discordId(),
                 ExampleUtility.User.SRNYX_ID,
                 ExampleUtility.Random.discordId(),
                 new Date(),
@@ -60,24 +64,28 @@ public class EAServerApplication extends EAObject {
 
         public Data() {}
 
-        public Data(@Nullable Set<Long> representatives, @Nullable String name, @Nullable String description, @Nullable String invite, @Nullable Set<EAPartnerServer.Tag> tags, @Nullable Integer color, @Nullable String thumbnail) {
-            this.representatives = representatives;
+        public Data(@Nullable Collection<Long> representatives, @Nullable String name, @Nullable String description, @Nullable String invite, @Nullable Collection<EAPartnerServer.Tag> tags, @Nullable Integer color, @Nullable String thumbnail) {
+            this.representatives = representatives == null ? null : new HashSet<>(representatives);
             this.name = name;
             this.description = description;
             this.invite = invite;
-            this.tags = tags;
+            this.tags = tags == null ? null : new HashSet<>(tags);
             this.color = color;
             this.thumbnail = thumbnail;
+        }
+
+        public Data(@NotNull Data data) {
+            this(data.representatives, data.name, data.description, data.invite, data.tags, data.color, data.thumbnail);
         }
 
         @NotNull
         public static Data getExample() {
             return new Data(
-                    new HashSet<>(Arrays.asList(ExampleUtility.User.SRNYX_ID, ExampleUtility.User.OIIINK_ID)),
+                    Arrays.asList(ExampleUtility.User.SRNYX_ID, ExampleUtility.User.OIIINK_ID),
                     "Example Server",
                     "This is an example server application.",
                     "skeppy",
-                    new HashSet<>(Arrays.asList(EAPartnerServer.Tag.FUN, EAPartnerServer.Tag.PVP)),
+                    Arrays.asList(EAPartnerServer.Tag.FUN, EAPartnerServer.Tag.PVP),
                     0xFF0000,
                     "https://us-east-1.tixte.net/uploads/img.venox.network/bee.png");
         }

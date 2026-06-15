@@ -6,7 +6,7 @@ import gg.eventalerts.sdk.websocket.message.action.EAUpdateSubscriptionAction;
 import org.jetbrains.annotations.NotNull;
 
 
-public enum SocketActionName {
+public enum SocketActionName implements SocketMessageName {
     UPDATE_SUBSCRIPTION(EAUpdateSubscriptionAction.class),
     PLAYER_CONNECTION(EAPlayerConnectionAction.class);
 
@@ -14,5 +14,10 @@ public enum SocketActionName {
 
     SocketActionName(@NotNull Class<? extends EAObject> objectType) {
         this.objectType = objectType;
+    }
+
+    @Override @NotNull
+    public Class<? extends EAObject> getObjectType() {
+        return objectType;
     }
 }

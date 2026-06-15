@@ -18,7 +18,7 @@ public class EAPartnerServers extends EAEndpoint<EAPartnerServer> {
     }
 
     @Override @NotNull
-    public Class<EAPartnerServer> getObjectClass() {
+    public Class<EAPartnerServer> getObjectType() {
         return EAPartnerServer.class;
     }
 

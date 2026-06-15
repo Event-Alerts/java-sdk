@@ -75,7 +75,7 @@ public final class WebSocketFixtureServer extends WebSocketServer {
 
             final SocketEvent<EAEvent> envelope = new SocketEvent<>();
             envelope.event = SocketEventName.EVENT_POSTED;
-            envelope.sequence = 3;
+            envelope.sequence = 3L;
             envelope.timestamp = new Date(1_700_000_000_123L);
             envelope.data = event;
 

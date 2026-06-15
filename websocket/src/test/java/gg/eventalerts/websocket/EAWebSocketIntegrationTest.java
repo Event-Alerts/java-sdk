@@ -7,7 +7,7 @@ import gg.eventalerts.sdk.websocket.SocketActionName;
 import gg.eventalerts.sdk.websocket.SocketEventName;
 import gg.eventalerts.sdk.websocket.handler.EventChatHandler;
 import gg.eventalerts.sdk.websocket.handler.EventPostedHandler;
-import gg.eventalerts.sdk.websocket.handler.SocketHandler;
+import gg.eventalerts.sdk.websocket.handler.SocketEventHandler;
 import gg.eventalerts.sdk.websocket.message.action.EAPlayerConnectionAction;
 import gg.eventalerts.sdk.websocket.message.action.EAUpdateSubscriptionAction;
 import gg.eventalerts.sdk.websocket.message.event.SocketEvent;
@@ -75,7 +75,7 @@ class EAWebSocketIntegrationTest {
         final SocketEvent<EAEvent> event = handler.captured.get();
         assertNotNull(event);
         assertEquals(SocketEventName.EVENT_POSTED, event.event);
-        assertEquals(Integer.valueOf(3), event.sequence);
+        assertEquals(Long.valueOf(3), event.sequence);
         assertNotNull(event.timestamp);
         assertNotNull(event.data);
         assertEquals(server.sentEvent().id, event.data.id);
@@ -180,7 +180,7 @@ class EAWebSocketIntegrationTest {
         socket.closeBlocking();
     }
 
-    private static EAWebSocket newSocket(SocketHandler<?>... handlers) {
+    private static EAWebSocket newSocket(SocketEventHandler<?>... handlers) {
         return new EAWebSocket.Builder("gg.eventalerts.sdk-test/1.0")
                 .url(SOCKET_URL)
                 .retry(false)

@@ -24,7 +24,7 @@ class GsonRoundTripTest {
     void socketEventRoundTripPreservesEnvelopeAndPayload() {
         final SocketEvent<EAEvent> original = new SocketEvent<>();
         original.event = SocketEventName.EVENT_POSTED;
-        original.sequence = 5;
+        original.sequence = 5L;
         original.timestamp = new Date(1_700_000_000_123L);
         original.data = EAEvent.getExample();
 

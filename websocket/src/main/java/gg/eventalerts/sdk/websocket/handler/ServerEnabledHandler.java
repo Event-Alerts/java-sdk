@@ -5,14 +5,9 @@ import gg.eventalerts.sdk.websocket.SocketEventName;
 import org.jetbrains.annotations.NotNull;
 
 
-public abstract class ServerEnabledHandler extends SocketHandler<EAPartnerServer> {
+public abstract class ServerEnabledHandler extends SocketEventHandler<EAPartnerServer> {
     @Override @NotNull
     public SocketEventName getName() {
         return SocketEventName.SERVER_ENABLED;
-    }
-
-    @Override @NotNull
-    public Class<EAPartnerServer> getObjectClass() {
-        return EAPartnerServer.class;
     }
 }

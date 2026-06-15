@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
-class SocketHandlerTest {
+class SocketEventHandlerTest {
     @Test
     void onMessageParsesTheEntireEnvelope() {
         final CapturingHandler handler = new CapturingHandler();
@@ -25,7 +25,7 @@ class SocketHandlerTest {
 
         final SocketEvent<EAEvent> envelope = new SocketEvent<>();
         envelope.event = SocketEventName.EVENT_POSTED;
-        envelope.sequence = 9;
+        envelope.sequence = 9L;
         envelope.timestamp = new Date(1_700_000_000_123L);
         envelope.data = payload;
 
@@ -38,7 +38,7 @@ class SocketHandlerTest {
         final SocketEvent<EAEvent> parsed = handler.captured.get();
         assertNotNull(parsed);
         assertEquals(SocketEventName.EVENT_POSTED, parsed.event);
-        assertEquals(Integer.valueOf(9), parsed.sequence);
+        assertEquals(Long.valueOf(9), parsed.sequence);
         assertEquals(envelope.timestamp, parsed.timestamp);
         assertNotNull(parsed.data);
         assertEquals(payload.id, parsed.data.id);

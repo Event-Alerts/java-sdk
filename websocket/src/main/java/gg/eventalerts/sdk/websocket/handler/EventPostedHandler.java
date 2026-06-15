@@ -5,14 +5,9 @@ import gg.eventalerts.sdk.websocket.SocketEventName;
 import org.jetbrains.annotations.NotNull;
 
 
-public abstract class EventPostedHandler extends SocketHandler<EAEvent> {
+public abstract class EventPostedHandler extends SocketEventHandler<EAEvent> {
     @Override @NotNull
     public SocketEventName getName() {
         return SocketEventName.EVENT_POSTED;
-    }
-
-    @Override @NotNull
-    public Class<EAEvent> getObjectClass() {
-        return EAEvent.class;
     }
 }
