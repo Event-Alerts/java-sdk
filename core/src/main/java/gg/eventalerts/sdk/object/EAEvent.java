@@ -1,5 +1,6 @@
 package gg.eventalerts.sdk.object;
 
+import com.google.gson.annotations.SerializedName;
 import gg.eventalerts.sdk.ExampleUtility;
 import org.bson.types.ObjectId;
 import org.jetbrains.annotations.NotNull;
@@ -9,38 +10,65 @@ import java.util.*;
 
 
 public class EAEvent extends EAObject {
+    @NotNull public static final String KEY_ID = "id";
+    @NotNull public static final String KEY_TYPE = "type";
+    @NotNull public static final String KEY_CHANNEL = "channel";
+    @NotNull public static final String KEY_MESSAGE = "message";
+    @NotNull public static final String KEY_CONTROL_PANEL = "controlPanel";
+    @NotNull public static final String KEY_CANCELLATION = "cancellation";
+    @NotNull public static final String KEY_REVIEWS = "reviews";
+    @NotNull public static final String KEY_CUSTOM = "custom";
+    @NotNull public static final String KEY_CREATED = "created";
+    @NotNull public static final String KEY_TITLE = "title";
+    @NotNull public static final String KEY_HOST = "host";
+    @NotNull public static final String KEY_DESCRIPTION = "description";
+    @NotNull public static final String KEY_ROLES = "roles";
+    @NotNull public static final String KEY_ROLES_NAMED = "rolesNamed";
+    @NotNull public static final String KEY_SERVER = "server";
+    @NotNull public static final String KEY_MEDIA = "media";
+    @NotNull public static final String KEY_SOURCE = "source";
+    @NotNull public static final String KEY_MODE = "mode";
+    @NotNull public static final String KEY_IP = "ip";
+    @NotNull public static final String KEY_PLATFORMS = "platforms";
+    @NotNull public static final String KEY_PLATFORM = "platform";
+    @NotNull public static final String KEY_VERSION = "version";
+    @NotNull public static final String KEY_PRIZE = "prize";
+    @NotNull public static final String KEY_MAX_PLAYERS = "maxPlayers";
+    @NotNull public static final String KEY_TIME = "time";
+    @NotNull public static final String KEY_SUBSCRIBERS = "subscribers";
+
     // BUILDER/CUSTOM
-    @Nullable public ObjectId id;
-    @Nullable public Type type;
-    @Nullable public Long channel;
-    @Nullable public Long message;
-    @Nullable public Long controlPanel;
-    @Nullable public Cancellation cancellation;
-    @Nullable public Set<Review> reviews;
-    @Nullable public Boolean custom;
-    @Nullable public Date created;
-    @Nullable public String title;
-    @Nullable public Long host;
-    @Nullable public String description;
-    @Nullable public Set<Long> roles;
-    @Nullable public Set<PingRole> rolesNamed;
-    @Nullable public ObjectId server;
-    @Nullable public Media media;
-    @Nullable public Source source;
+    @SerializedName(KEY_ID) @Nullable public ObjectId id;
+    @SerializedName(KEY_TYPE) @Nullable public Type type;
+    @SerializedName(KEY_CHANNEL) @Nullable public Long channel;
+    @SerializedName(KEY_MESSAGE) @Nullable public Long message;
+    @SerializedName(KEY_CONTROL_PANEL) @Nullable public Long controlPanel;
+    @SerializedName(KEY_CANCELLATION) @Nullable public Cancellation cancellation;
+    @SerializedName(KEY_REVIEWS) @Nullable public Set<Review> reviews;
+    @SerializedName(KEY_CUSTOM) @Nullable public Boolean custom;
+    @SerializedName(KEY_CREATED) @Nullable public Date created;
+    @SerializedName(KEY_TITLE) @Nullable public String title;
+    @SerializedName(KEY_HOST) @Nullable public Long host;
+    @SerializedName(KEY_DESCRIPTION) @Nullable public String description;
+    @SerializedName(KEY_ROLES) @Nullable public Set<Long> roles;
+    @SerializedName(KEY_ROLES_NAMED) @Nullable public Set<PingRole> rolesNamed;
+    @SerializedName(KEY_SERVER) @Nullable public ObjectId server;
+    @SerializedName(KEY_MEDIA) @Nullable public Media media;
+    @SerializedName(KEY_SOURCE) @Nullable public Source source;
 
     // BUILDER
-    @Nullable public Mode mode;
-    @Nullable public String ip;
-    @Nullable public Set<Platform> platforms;
-    @Nullable public String platform;
-    @Nullable public String version;
-    @Nullable public String prize;
-    @Nullable public Integer maxPlayers;
+    @SerializedName(KEY_MODE) @Nullable public Mode mode;
+    @SerializedName(KEY_IP) @Nullable public String ip;
+    @SerializedName(KEY_PLATFORMS) @Nullable public Set<Platform> platforms;
+    @SerializedName(KEY_PLATFORM) @Nullable public String platform;
+    @SerializedName(KEY_VERSION) @Nullable public String version;
+    @SerializedName(KEY_PRIZE) @Nullable public String prize;
+    @SerializedName(KEY_MAX_PLAYERS) @Nullable public Integer maxPlayers;
     /**
      * The time the event starts
      */
-    @Nullable public Date time;
-    @Nullable public Set<Long> subscribers;
+    @SerializedName(KEY_TIME) @Nullable public Date time;
+    @SerializedName(KEY_SUBSCRIBERS) @Nullable public Set<Long> subscribers;
 
     public EAEvent() {}
 
@@ -194,9 +222,13 @@ public class EAEvent extends EAObject {
     }
 
     public static class Cancellation extends EAObject {
-        @Nullable public Date timestamp;
-        @Nullable public Long user;
-        @Nullable public String reason;
+        @NotNull public static final String KEY_TIMESTAMP = "timestamp";
+        @NotNull public static final String KEY_USER = "user";
+        @NotNull public static final String KEY_REASON = "reason";
+
+        @SerializedName(KEY_TIMESTAMP) @Nullable public Date timestamp;
+        @SerializedName(KEY_USER) @Nullable public Long user;
+        @SerializedName(KEY_REASON) @Nullable public String reason;
 
         public Cancellation() {}
 
@@ -220,10 +252,15 @@ public class EAEvent extends EAObject {
     }
 
     public static class Review extends EAObject {
-        @Nullable public Long reviewer;
-        @Nullable public Date timestamp;
-        @Nullable public String comments;
-        @Nullable public Map<Category, Integer> categories;
+        @NotNull public static final String KEY_REVIEWER = "reviewer";
+        @NotNull public static final String KEY_TIMESTAMP = "timestamp";
+        @NotNull public static final String KEY_COMMENTS = "comments";
+        @NotNull public static final String KEY_CATEGORIES = "categories";
+
+        @SerializedName(KEY_REVIEWER) @Nullable public Long reviewer;
+        @SerializedName(KEY_TIMESTAMP) @Nullable public Date timestamp;
+        @SerializedName(KEY_COMMENTS) @Nullable public String comments;
+        @SerializedName(KEY_CATEGORIES) @Nullable public Map<Category, Integer> categories;
 
         public Review() {}
 
@@ -259,8 +296,11 @@ public class EAEvent extends EAObject {
     }
 
     public static class Media extends EAObject {
-        @Nullable public String url;
-        @Nullable public String name;
+        @NotNull public static final String KEY_URL = "url";
+        @NotNull public static final String KEY_NAME = "name";
+
+        @SerializedName(KEY_URL) @Nullable public String url;
+        @SerializedName(KEY_NAME) @Nullable public String name;
 
         public Media() {}
 

@@ -1,15 +1,21 @@
 package gg.eventalerts.sdk.object;
 
+import com.google.gson.annotations.SerializedName;
 import gg.eventalerts.sdk.ExampleUtility;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 
 public class EAFamousEvent extends EAObject {
-    @Nullable public Type type;
-    @Nullable public Long channel;
-    @Nullable public String message;
-    @Nullable public Long user;
+    @NotNull public static final String KEY_TYPE = "type";
+    @NotNull public static final String KEY_CHANNEL = "channel";
+    @NotNull public static final String KEY_MESSAGE = "message";
+    @NotNull public static final String KEY_USER = "user";
+
+    @SerializedName(KEY_TYPE) @Nullable public Type type;
+    @SerializedName(KEY_CHANNEL) @Nullable public Long channel;
+    @SerializedName(KEY_MESSAGE) @Nullable public String message;
+    @SerializedName(KEY_USER) @Nullable public Long user;
 
     public EAFamousEvent() {}
 

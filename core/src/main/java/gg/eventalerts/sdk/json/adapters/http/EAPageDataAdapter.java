@@ -1,10 +1,12 @@
 package gg.eventalerts.sdk.json.adapters.http;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.google.gson.TypeAdapter;
+import com.google.gson.TypeAdapterFactory;
+import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import gg.eventalerts.sdk.json.GSONProvider;
-import gg.eventalerts.sdk.object.EAObject;
 import gg.eventalerts.sdk.object.http.EAPageData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -12,27 +14,31 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 
 
-public class EAPageDataAdapter extends TypeAdapter<EAPageData<? extends EAObject>> {
-    @Override
-    public void write(@NotNull JsonWriter out, @Nullable EAPageData<? extends EAObject> value) throws IOException {
-        if (value == null) {
-            out.nullValue();
-            return;
-        }
-
-        out.beginObject();
-        out.name("page").value(value.page);
-        out.name("limit").value(value.limit);
-        out.name("count").value(value.count);
-        out.name("total").value(value.total);
-        if (value.all != null) out.name("all").value(value.all);
-        out.name(value.itemsFieldName);
-        GSONProvider.GSON.toJson(value.items, value.items.getClass(), out);
-        out.endObject();
-    }
-
+public class EAPageDataAdapter implements TypeAdapterFactory {
     @Override @Nullable
-    public EAPageData<? extends EAObject> read(@NotNull JsonReader in) {
-        throw new UnsupportedOperationException("Deserialization of EAPageData is not supported");
+    public <T> TypeAdapter<T> create(@NotNull Gson gson, @NotNull TypeToken<T> type) {
+        if (!EAPageData.class.isAssignableFrom(type.getRawType())) return null;
+
+        final TypeAdapter<T> delegate = gson.getDelegateAdapter(this, type);
+        return new TypeAdapter<T>() {
+            @Override
+            public void write(@NotNull JsonWriter out, @Nullable T value) throws IOException {
+                // Null
+                if (value == null) {
+                    out.nullValue();
+                    return;
+                }
+
+                final EAPageData<?> pageData = (EAPageData<?>) value;
+                final JsonObject jsonObject = delegate.toJsonTree(value).getAsJsonObject();
+                jsonObject.add(pageData.itemsFieldName, jsonObject.remove(EAPageData.KEY_ITEMS));
+                gson.toJson(jsonObject, out);
+            }
+
+            @Override
+            public T read(@NotNull JsonReader in) {
+                throw new UnsupportedOperationException("Deserialization of EAPageData is not supported");
+            }
+        };
     }
 }

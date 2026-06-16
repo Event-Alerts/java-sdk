@@ -1,5 +1,6 @@
 package gg.eventalerts.sdk.object;
 
+import com.google.gson.annotations.SerializedName;
 import gg.eventalerts.sdk.ExampleUtility;
 import org.bson.types.ObjectId;
 import org.jetbrains.annotations.NotNull;
@@ -9,15 +10,25 @@ import java.util.*;
 
 
 public class EAPlayer extends EAObject {
-    @Nullable public ObjectId id;
-    @Nullable public Discord discord;
-    @Nullable public Minecraft minecraft;
-    @Nullable public LinkMethod linkMethod;
-    @Nullable public Set<Integer> anniversaries;
-    @Nullable public Set<Long> boosterPasses;
-    @Nullable public ObjectId defaultPreset;
-    @Nullable public Double rating;
-    @Nullable public Subscription subscription;
+    @NotNull public static final String KEY_ID = "id";
+    @NotNull public static final String KEY_DISCORD = "discord";
+    @NotNull public static final String KEY_MINECRAFT = "minecraft";
+    @NotNull public static final String KEY_LINK_METHOD = "linkMethod";
+    @NotNull public static final String KEY_ANNIVERSARIES = "anniversaries";
+    @NotNull public static final String KEY_BOOSTER_PASSES = "boosterPasses";
+    @NotNull public static final String KEY_DEFAULT_PRESET = "defaultPreset";
+    @NotNull public static final String KEY_RATING = "rating";
+    @NotNull public static final String KEY_SUBSCRIPTION = "subscription";
+
+    @SerializedName(KEY_ID) @Nullable public ObjectId id;
+    @SerializedName(KEY_DISCORD) @Nullable public Discord discord;
+    @SerializedName(KEY_MINECRAFT) @Nullable public Minecraft minecraft;
+    @SerializedName(KEY_LINK_METHOD) @Nullable public LinkMethod linkMethod;
+    @SerializedName(KEY_ANNIVERSARIES) @Nullable public Set<Integer> anniversaries;
+    @SerializedName(KEY_BOOSTER_PASSES) @Nullable public Set<Long> boosterPasses;
+    @SerializedName(KEY_DEFAULT_PRESET) @Nullable public ObjectId defaultPreset;
+    @SerializedName(KEY_RATING) @Nullable public Double rating;
+    @SerializedName(KEY_SUBSCRIPTION) @Nullable public Subscription subscription;
 
     public EAPlayer() {}
 
@@ -74,9 +85,13 @@ public class EAPlayer extends EAObject {
     }
 
     public static class Discord extends EAObject {
-        @Nullable public String id;
-        @Nullable public String username;
-        @Nullable public Set<EAPlayer.Discord.Role> roles;
+        @NotNull public static final String KEY_ID = "id";
+        @NotNull public static final String KEY_USERNAME = "username";
+        @NotNull public static final String KEY_ROLES = "roles";
+
+        @SerializedName(KEY_ID) @Nullable public String id;
+        @SerializedName(KEY_USERNAME) @Nullable public String username;
+        @SerializedName(KEY_ROLES) @Nullable public Set<EAPlayer.Discord.Role> roles;
 
         public Discord() {}
 
@@ -108,8 +123,11 @@ public class EAPlayer extends EAObject {
     }
 
     public static class Minecraft extends EAObject {
-        @Nullable public UUID uuid;
-        @Nullable public String username;
+        @NotNull public static final String KEY_UUID = "uuid";
+        @NotNull public static final String KEY_USERNAME = "username";
+
+        @SerializedName(KEY_UUID) @Nullable public UUID uuid;
+        @SerializedName(KEY_USERNAME) @Nullable public String username;
 
         public Minecraft() {}
 
@@ -127,8 +145,11 @@ public class EAPlayer extends EAObject {
     }
 
     public static class Subscription extends EAObject {
-        @Nullable public EAPlayer.Subscription.Tier tier;
-        @Nullable public List<Long> servers;
+        @NotNull public static final String KEY_TIER = "tier";
+        @NotNull public static final String KEY_SERVERS = "servers";
+
+        @SerializedName(KEY_TIER) @Nullable public EAPlayer.Subscription.Tier tier;
+        @SerializedName(KEY_SERVERS) @Nullable public List<Long> servers;
 
         public Subscription() {}
 

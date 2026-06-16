@@ -1,5 +1,6 @@
 package gg.eventalerts.sdk.object;
 
+import com.google.gson.annotations.SerializedName;
 import gg.eventalerts.sdk.ExampleUtility;
 import org.bson.types.ObjectId;
 import org.jetbrains.annotations.NotNull;
@@ -10,12 +11,19 @@ import java.util.UUID;
 
 
 public class EACrossBan extends EAObject {
-    @Nullable public ObjectId id;
-    @Nullable public Long discordId;
-    @Nullable public UUID minecraftUuid;
-    @Nullable public String reason;
-    @Nullable public Date expiration;
-    @Nullable public Date created;
+    @NotNull public static final String KEY_ID = "id";
+    @NotNull public static final String KEY_DISCORD_ID = "discordId";
+    @NotNull public static final String KEY_MINECRAFT_UUID = "minecraftUuid";
+    @NotNull public static final String KEY_REASON = "reason";
+    @NotNull public static final String KEY_EXPIRATION = "expiration";
+    @NotNull public static final String KEY_CREATED = "created";
+
+    @SerializedName(KEY_ID) @Nullable public ObjectId id;
+    @SerializedName(KEY_DISCORD_ID) @Nullable public Long discordId;
+    @SerializedName(KEY_MINECRAFT_UUID) @Nullable public UUID minecraftUuid;
+    @SerializedName(KEY_REASON) @Nullable public String reason;
+    @SerializedName(KEY_EXPIRATION) @Nullable public Date expiration;
+    @SerializedName(KEY_CREATED) @Nullable public Date created;
 
     public EACrossBan() {}
 

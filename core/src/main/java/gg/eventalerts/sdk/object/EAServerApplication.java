@@ -1,5 +1,6 @@
 package gg.eventalerts.sdk.object;
 
+import com.google.gson.annotations.SerializedName;
 import gg.eventalerts.sdk.ExampleUtility;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -12,13 +13,21 @@ import java.util.Set;
 
 
 public class EAServerApplication extends EAObject {
-    @Nullable public Long id;
-    @Nullable public Long applicant;
-    @Nullable public Long channel;
-    @Nullable public Date created;
-    @Nullable public Long message;
-    @Nullable public ApprovedBy approvedBy;
-    @Nullable public Data data;
+    @NotNull public static final String KEY_ID = "id";
+    @NotNull public static final String KEY_APPLICANT = "applicant";
+    @NotNull public static final String KEY_CHANNEL = "channel";
+    @NotNull public static final String KEY_CREATED = "created";
+    @NotNull public static final String KEY_MESSAGE = "message";
+    @NotNull public static final String KEY_APPROVED_BY = "approvedBy";
+    @NotNull public static final String KEY_DATA = "data";
+
+    @SerializedName(KEY_ID) @Nullable public Long id;
+    @SerializedName(KEY_APPLICANT) @Nullable public Long applicant;
+    @SerializedName(KEY_CHANNEL) @Nullable public Long channel;
+    @SerializedName(KEY_CREATED) @Nullable public Date created;
+    @SerializedName(KEY_MESSAGE) @Nullable public Long message;
+    @SerializedName(KEY_APPROVED_BY) @Nullable public ApprovedBy approvedBy;
+    @SerializedName(KEY_DATA) @Nullable public Data data;
 
     public EAServerApplication() {}
 
@@ -54,13 +63,21 @@ public class EAServerApplication extends EAObject {
     }
 
     public static class Data extends EAObject {
-        @Nullable public Set<Long> representatives;
-        @Nullable public String name;
-        @Nullable public String description;
-        @Nullable public String invite;
-        @Nullable public Set<EAPartnerServer.Tag> tags;
-        @Nullable public Integer color;
-        @Nullable public String thumbnail;
+        @NotNull public static final String KEY_REPRESENTATIVES = "representatives";
+        @NotNull public static final String KEY_NAME = "name";
+        @NotNull public static final String KEY_DESCRIPTION = "description";
+        @NotNull public static final String KEY_INVITE = "invite";
+        @NotNull public static final String KEY_TAGS = "tags";
+        @NotNull public static final String KEY_COLOR = "color";
+        @NotNull public static final String KEY_THUMBNAIL = "thumbnail";
+
+        @SerializedName(KEY_REPRESENTATIVES) @Nullable public Set<Long> representatives;
+        @SerializedName(KEY_NAME) @Nullable public String name;
+        @SerializedName(KEY_DESCRIPTION) @Nullable public String description;
+        @SerializedName(KEY_INVITE) @Nullable public String invite;
+        @SerializedName(KEY_TAGS) @Nullable public Set<EAPartnerServer.Tag> tags;
+        @SerializedName(KEY_COLOR) @Nullable public Integer color;
+        @SerializedName(KEY_THUMBNAIL) @Nullable public String thumbnail;
 
         public Data() {}
 

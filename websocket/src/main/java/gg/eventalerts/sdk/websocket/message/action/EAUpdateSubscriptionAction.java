@@ -1,5 +1,6 @@
 package gg.eventalerts.sdk.websocket.message.action;
 
+import com.google.gson.annotations.SerializedName;
 import gg.eventalerts.sdk.object.EAObject;
 import gg.eventalerts.sdk.websocket.SocketEventName;
 import org.jetbrains.annotations.NotNull;
@@ -12,8 +13,11 @@ import java.util.Set;
 
 
 public class EAUpdateSubscriptionAction extends EAObject {
-    @Nullable public Set<SocketEventName> subscribe;
-    @Nullable public Set<SocketEventName> unsubscribe;
+    @NotNull public static final String KEY_SUBSCRIBE = "subscribe";
+    @NotNull public static final String KEY_UNSUBSCRIBE = "unsubscribe";
+
+    @SerializedName(KEY_SUBSCRIBE) @Nullable public Set<SocketEventName> subscribe;
+    @SerializedName(KEY_UNSUBSCRIBE) @Nullable public Set<SocketEventName> unsubscribe;
 
     public EAUpdateSubscriptionAction() {}
 

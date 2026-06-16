@@ -1,12 +1,15 @@
 package gg.eventalerts.sdk.websocket.message.event;
 
+import com.google.gson.annotations.SerializedName;
 import gg.eventalerts.sdk.object.EACrossBan;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 
 public class EACrossBanEvent extends EACrossBan {
-    @Nullable public Status status;
+    @NotNull public static final String KEY_STATUS = "status";
+
+    @SerializedName(KEY_STATUS) @Nullable public Status status;
 
     public EACrossBanEvent() {}
 

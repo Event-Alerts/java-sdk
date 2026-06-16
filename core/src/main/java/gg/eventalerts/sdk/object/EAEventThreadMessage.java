@@ -1,5 +1,6 @@
 package gg.eventalerts.sdk.object;
 
+import com.google.gson.annotations.SerializedName;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -7,10 +8,15 @@ import java.util.List;
 
 
 public class EAEventThreadMessage extends EAObject {
-    @Nullable public EAEvent event;
-    @Nullable public Channel channel;
-    @Nullable public Author author;
-    @Nullable public EAEventThreadMessage.Message message;
+    @NotNull public static final String KEY_EVENT = "event";
+    @NotNull public static final String KEY_CHANNEL = "channel";
+    @NotNull public static final String KEY_AUTHOR = "author";
+    @NotNull public static final String KEY_MESSAGE = "message";
+
+    @SerializedName(KEY_EVENT) @Nullable public EAEvent event;
+    @SerializedName(KEY_CHANNEL) @Nullable public Channel channel;
+    @SerializedName(KEY_AUTHOR) @Nullable public Author author;
+    @SerializedName(KEY_MESSAGE) @Nullable public EAEventThreadMessage.Message message;
 
     public EAEventThreadMessage() {}
 
@@ -26,8 +32,11 @@ public class EAEventThreadMessage extends EAObject {
     }
 
     public static class Channel extends EAObject{
-        @Nullable public Long id;
-        @Nullable public String name;
+        @NotNull public static final String KEY_ID = "id";
+        @NotNull public static final String KEY_NAME = "name";
+
+        @SerializedName(KEY_ID) @Nullable public Long id;
+        @SerializedName(KEY_NAME) @Nullable public String name;
 
         public Channel() {}
 
@@ -42,10 +51,15 @@ public class EAEventThreadMessage extends EAObject {
     }
 
     public static class Author extends EAObject {
-        @Nullable public Long id;
-        @Nullable public String name;
-        @Nullable public String effectiveName;
-        @Nullable public EAPlayer player;
+        @NotNull public static final String KEY_ID = "id";
+        @NotNull public static final String KEY_NAME = "name";
+        @NotNull public static final String KEY_EFFECTIVE_NAME = "effectiveName";
+        @NotNull public static final String KEY_PLAYER = "player";
+
+        @SerializedName(KEY_ID) @Nullable public Long id;
+        @SerializedName(KEY_NAME) @Nullable public String name;
+        @SerializedName(KEY_EFFECTIVE_NAME) @Nullable public String effectiveName;
+        @SerializedName(KEY_PLAYER) @Nullable public EAPlayer player;
 
         public Author() {}
 
@@ -62,9 +76,13 @@ public class EAEventThreadMessage extends EAObject {
     }
 
     public static class Message extends EAObject {
-        @Nullable public Long id;
-        @Nullable public Content content;
-        @Nullable public List<Attachment> attachments;
+        @NotNull public static final String KEY_ID = "id";
+        @NotNull public static final String KEY_CONTENT = "content";
+        @NotNull public static final String KEY_ATTACHMENTS = "attachments";
+
+        @SerializedName(KEY_ID) @Nullable public Long id;
+        @SerializedName(KEY_CONTENT) @Nullable public Content content;
+        @SerializedName(KEY_ATTACHMENTS) @Nullable public List<Attachment> attachments;
 
         public Message() {}
 
@@ -79,9 +97,13 @@ public class EAEventThreadMessage extends EAObject {
         }
 
         public static class Content extends EAObject {
-            @Nullable public String raw;
-            @Nullable public String display;
-            @Nullable public String stripped;
+            @NotNull public static final String KEY_RAW = "raw";
+            @NotNull public static final String KEY_DISPLAY = "display";
+            @NotNull public static final String KEY_STRIPPED = "stripped";
+
+            @SerializedName(KEY_RAW) @Nullable public String raw;
+            @SerializedName(KEY_DISPLAY) @Nullable public String display;
+            @SerializedName(KEY_STRIPPED) @Nullable public String stripped;
 
             public Content() {}
 
@@ -97,10 +119,15 @@ public class EAEventThreadMessage extends EAObject {
         }
 
         public static class Attachment extends EAObject {
-            @Nullable public Long id;
-            @Nullable public String name;
-            @Nullable public String url;
-            @Nullable public String proxyUrl;
+            @NotNull public static final String KEY_ID = "id";
+            @NotNull public static final String KEY_NAME = "name";
+            @NotNull public static final String KEY_URL = "url";
+            @NotNull public static final String KEY_PROXY_URL = "proxyUrl";
+
+            @SerializedName(KEY_ID) @Nullable public Long id;
+            @SerializedName(KEY_NAME) @Nullable public String name;
+            @SerializedName(KEY_URL) @Nullable public String url;
+            @SerializedName(KEY_PROXY_URL) @Nullable public String proxyUrl;
 
             public Attachment() {}
 

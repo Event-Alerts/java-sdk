@@ -1,5 +1,6 @@
 package gg.eventalerts.sdk.object;
 
+import com.google.gson.annotations.SerializedName;
 import gg.eventalerts.sdk.ExampleUtility;
 import org.bson.types.ObjectId;
 import org.jetbrains.annotations.NotNull;
@@ -9,21 +10,37 @@ import java.util.*;
 
 
 public class EAPartnerServer extends EAObject {
-    @Nullable public ObjectId id;
-    @Nullable public Long serverId;
-    @Nullable public Date created;
-    @Nullable public Set<Long> representatives;
-    @Nullable public Date enabled;
-    @Nullable public String name;
-    @Nullable public String description;
-    @Nullable public String invite;
-    @Nullable public Set<Tag> tags;
-    @Nullable public Integer color;
-    @Nullable public String thumbnail;
-    @Nullable public Long message;
-    @Nullable public Map<Long, Integer> gets;
-    @Nullable public DisableData disableData;
-    @Nullable public String apiKey;
+    @NotNull public static final String KEY_ID = "id";
+    @NotNull public static final String KEY_SERVER_ID = "serverId";
+    @NotNull public static final String KEY_CREATED = "created";
+    @NotNull public static final String KEY_REPRESENTATIVES = "representatives";
+    @NotNull public static final String KEY_ENABLED = "enabled";
+    @NotNull public static final String KEY_NAME = "name";
+    @NotNull public static final String KEY_DESCRIPTION = "description";
+    @NotNull public static final String KEY_INVITE = "invite";
+    @NotNull public static final String KEY_TAGS = "tags";
+    @NotNull public static final String KEY_COLOR = "color";
+    @NotNull public static final String KEY_THUMBNAIL = "thumbnail";
+    @NotNull public static final String KEY_MESSAGE = "message";
+    @NotNull public static final String KEY_GETS = "gets";
+    @NotNull public static final String KEY_DISABLE_DATA = "disableData";
+    @NotNull public static final String KEY_API_KEY = "apiKey";
+
+    @SerializedName(KEY_ID) @Nullable public ObjectId id;
+    @SerializedName(KEY_SERVER_ID) @Nullable public Long serverId;
+    @SerializedName(KEY_CREATED) @Nullable public Date created;
+    @SerializedName(KEY_REPRESENTATIVES) @Nullable public Set<Long> representatives;
+    @SerializedName(KEY_ENABLED) @Nullable public Date enabled;
+    @SerializedName(KEY_NAME) @Nullable public String name;
+    @SerializedName(KEY_DESCRIPTION) @Nullable public String description;
+    @SerializedName(KEY_INVITE) @Nullable public String invite;
+    @SerializedName(KEY_TAGS) @Nullable public Set<Tag> tags;
+    @SerializedName(KEY_COLOR) @Nullable public Integer color;
+    @SerializedName(KEY_THUMBNAIL) @Nullable public String thumbnail;
+    @SerializedName(KEY_MESSAGE) @Nullable public Long message;
+    @SerializedName(KEY_GETS) @Nullable public Map<Long, Integer> gets;
+    @SerializedName(KEY_DISABLE_DATA) @Nullable public DisableData disableData;
+    @SerializedName(KEY_API_KEY) @Nullable public String apiKey;
 
     public EAPartnerServer() {}
 
@@ -99,11 +116,14 @@ public class EAPartnerServer extends EAObject {
     }
 
     public static class DisableData extends EAObject {
-        @Nullable public String reason;
+        @NotNull public static final String KEY_REASON = "reason";
+        @NotNull public static final String KEY_TIME = "time";
+
+        @SerializedName(KEY_REASON) @Nullable public String reason;
         /**
          * When the server was disabled
          */
-        @Nullable public Date time;
+        @SerializedName(KEY_TIME) @Nullable public Date time;
 
         public DisableData() {}
 

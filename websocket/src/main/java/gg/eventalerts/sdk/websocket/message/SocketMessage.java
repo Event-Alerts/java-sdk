@@ -1,5 +1,6 @@
 package gg.eventalerts.sdk.websocket.message;
 
+import com.google.gson.annotations.SerializedName;
 import gg.eventalerts.sdk.json.GSONProvider;
 import gg.eventalerts.sdk.object.EAObject;
 import org.jetbrains.annotations.NotNull;
@@ -10,8 +11,11 @@ import java.util.Date;
 
 
 public class SocketMessage<T extends EAObject> extends EAObject {
-    @Nullable public Date timestamp;
-    @Nullable public T data;
+    @NotNull public static final String KEY_TIMESTAMP = "timestamp";
+    @NotNull public static final String KEY_DATA = "data";
+
+    @SerializedName(KEY_TIMESTAMP) @Nullable public Date timestamp;
+    @SerializedName(KEY_DATA) @Nullable public T data;
 
     public SocketMessage() {}
 

@@ -1,5 +1,6 @@
 package gg.eventalerts.sdk.websocket.message.action;
 
+import com.google.gson.annotations.SerializedName;
 import gg.eventalerts.sdk.ExampleUtility;
 import gg.eventalerts.sdk.object.EAObject;
 import org.jetbrains.annotations.NotNull;
@@ -10,10 +11,15 @@ import java.util.UUID;
 
 
 public class EAPlayerConnectionAction extends EAObject {
-    @Nullable public UUID uuid;
-    @Nullable public String username;
-    @Nullable public Date timestamp;
-    @Nullable public Type type;
+    @NotNull public static final String KEY_UUID = "uuid";
+    @NotNull public static final String KEY_USERNAME = "username";
+    @NotNull public static final String KEY_TIMESTAMP = "timestamp";
+    @NotNull public static final String KEY_TYPE = "type";
+
+    @SerializedName(KEY_UUID) @Nullable public UUID uuid;
+    @SerializedName(KEY_USERNAME) @Nullable public String username;
+    @SerializedName(KEY_TIMESTAMP) @Nullable public Date timestamp;
+    @SerializedName(KEY_TYPE) @Nullable public Type type;
 
     public EAPlayerConnectionAction() {}
 
