@@ -36,8 +36,8 @@ public class CollectionAdapter implements TypeAdapterFactory {
         return new TypeAdapter<T>() {
             @Override
             public void write(@NotNull JsonWriter out, @Nullable T value) throws IOException {
-                // Null
-                if (value == null) {
+                // Null or empty
+                if (value == null || ((Collection<?>) value).isEmpty()) {
                     out.nullValue();
                     return;
                 }
