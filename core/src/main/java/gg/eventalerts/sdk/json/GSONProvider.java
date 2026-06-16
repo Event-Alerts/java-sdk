@@ -6,6 +6,10 @@ import com.google.gson.internal.$Gson$Types;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import gg.eventalerts.sdk.json.adapters.*;
+import gg.eventalerts.sdk.json.adapters.http.EAItemDataAdapter;
+import gg.eventalerts.sdk.json.adapters.http.EAPageDataAdapter;
+import gg.eventalerts.sdk.object.http.EAItemData;
+import gg.eventalerts.sdk.object.http.EAPageData;
 import org.bson.types.ObjectId;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -17,7 +21,8 @@ import java.util.UUID;
 
 public final class GSONProvider {
     @NotNull public static final Gson GSON = new GsonBuilder()
-            .setPrettyPrinting()
+            .registerTypeAdapter(EAItemData.class, new EAItemDataAdapter())
+            .registerTypeAdapter(EAPageData.class, new EAPageDataAdapter())
             .registerTypeAdapter(Boolean.class, new BooleanAdapter())
             .registerTypeAdapter(Date.class, new DateAdapter())
             .registerTypeAdapter(Double.class, new DoubleAdapter())

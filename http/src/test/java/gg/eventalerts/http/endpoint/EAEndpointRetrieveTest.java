@@ -4,6 +4,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import gg.eventalerts.sdk.http.EAHTTP;
+import gg.eventalerts.sdk.http.response.PaginatedResponse;
 import gg.eventalerts.sdk.http.exception.EAHttpRequestException;
 import gg.eventalerts.sdk.http.endpoint.EAEvents;
 import gg.eventalerts.sdk.object.EAEvent;
@@ -22,7 +23,6 @@ import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -60,7 +60,7 @@ class EAEndpointRetrieveTest {
     }
 
     @Test
-    void retrieveManyCompletesWithListAndSendsEncodedQueryAndHeaders() {
+    void retrievePageCompletesWithListAndSendsEncodedQueryAndHeaders() {
         final EAHTTP http = new EAHTTP.Builder("EventAlertsSDK/1.0")
                 .url(baseUrl)
                 .bearerToken("bearer-token")
@@ -69,11 +69,14 @@ class EAEndpointRetrieveTest {
         final Map<String, Object> query = new LinkedHashMap<>();
         query.put("search term", "alpha & beta");
 
-        final List<EAEvent> result = http.events.retrieveMany(query).complete();
+        final PaginatedResponse<EAEvent> result = http.events.retrievePage(query).complete();
 
-        assertEquals(1, result.size());
-        assertEquals(new ObjectId("507f1f77bcf86cd799439011"), result.get(0).id);
-        assertEquals("Example Event", result.get(0).title);
+        assertEquals(1, result.items.size());
+        assertEquals(new ObjectId("507f1f77bcf86cd799439011"), result.items.get(0).id);
+        assertEquals("Example Event", result.items.get(0).title);
+        assertEquals(1, result.page);
+        assertEquals(1, result.count);
+        assertEquals(1, result.total);
 
         assertEquals("/api/v1/events", lastPath.get());
         assertEquals("search+term=alpha+%26+beta", lastQuery.get());
@@ -85,10 +88,10 @@ class EAEndpointRetrieveTest {
     }
 
     @Test
-    void retrieveOneCompletesWithSingleObject() {
+    void retrieveOneDataCompletesWithSingleObject() {
         final EAHTTP http = new EAHTTP.Builder("EventAlertsSDK/1.0").url(baseUrl).build();
 
-        final EAEvent event = http.events.retrieveOneById(new ObjectId("507f1f77bcf86cd799439011")).complete();
+        final EAEvent event = http.events.retrieveOneDataById(new ObjectId("507f1f77bcf86cd799439011")).complete().item;
 
         assertNotNull(event);
         assertEquals(new ObjectId("507f1f77bcf86cd799439011"), event.id);
@@ -130,8 +133,8 @@ class EAEndpointRetrieveTest {
         final EAHTTP http = new EAHTTP.Builder("EventAlertsSDK/1.0").url(baseUrl).build();
 
         final CountDownLatch latch = new CountDownLatch(1);
-        final AtomicReference<List<EAEvent>> callbackResult = new AtomicReference<>();
-        http.events.retrieveMany().queue(result -> {
+        final AtomicReference<PaginatedResponse<EAEvent>> callbackResult = new AtomicReference<>();
+        http.events.retrievePage().queue(result -> {
             callbackResult.set(result);
             latch.countDown();
         }, throwable -> {
@@ -140,7 +143,7 @@ class EAEndpointRetrieveTest {
 
         assertTrue(latch.await(5, TimeUnit.SECONDS));
         assertNotNull(callbackResult.get());
-        assertFalse(callbackResult.get().isEmpty());
+        assertFalse(callbackResult.get().items.isEmpty());
     }
 
     @Test
@@ -153,7 +156,7 @@ class EAEndpointRetrieveTest {
             }
         };
 
-        assertThrows(AssertionError.class, () -> events.retrieveMany(Collections.emptyMap()).complete());
+        assertThrows(AssertionError.class, () -> events.retrievePage(Collections.emptyMap()).complete());
     }
 
     private static class TestHandler implements HttpHandler {

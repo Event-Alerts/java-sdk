@@ -3,11 +3,13 @@ package gg.eventalerts.sdk.http.endpoint;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonElement;
 import gg.eventalerts.sdk.http.EAHTTP;
+import gg.eventalerts.sdk.http.response.PaginatedResponse;
 import gg.eventalerts.sdk.http.action.EAAction;
 import gg.eventalerts.sdk.http.exception.EAHttpRequestException;
 import gg.eventalerts.sdk.http.exception.EAHttpResponseException;
 import gg.eventalerts.sdk.json.GSONProvider;
 import gg.eventalerts.sdk.object.EAObject;
+import gg.eventalerts.sdk.object.http.EAItemData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,15 +21,10 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
+import java.util.*;
 
 
 public abstract class EAEndpoint<O extends EAObject> {
-    @NotNull private static final Logger LOGGER = Logger.getLogger(EAEndpoint.class.getName());
-
     @NotNull private final EAHTTP http;
 
     public EAEndpoint(@NotNull EAHTTP http) {
@@ -38,21 +35,141 @@ public abstract class EAEndpoint<O extends EAObject> {
     public abstract String getPath();
 
     @NotNull
+    public String getPaginatedFieldName() {
+        return getPath();
+    }
+
+    @NotNull
+    public String getSingleFieldName() {
+        final String paginatedFieldName = getPaginatedFieldName();
+        return paginatedFieldName.endsWith("s") ? paginatedFieldName.substring(0, paginatedFieldName.length() - 1) : paginatedFieldName;
+    }
+
+    @NotNull
     public abstract Class<O> getObjectType();
 
+    /**
+     * Retrieves the first page of results
+     */
     @NotNull
-    public EAAction<List<O>> retrieveMany(@Nullable Map<String, Object> queryParams) {
-        return new EAAction<>("GET " + getPath(), () -> executeMany(queryParams));
+    public EAAction<PaginatedResponse<O>> retrievePage() {
+        return retrievePage(null);
     }
 
+    /**
+     * Retrieves the first page of results.
+     * <br>You can specify page/limit in the query parameters.
+     *
+     * @param   queryParams optional query parameters
+     *
+     * @return  action yielding a {@link PaginatedResponse} with items and metadata
+     */
     @NotNull
-    public EAAction<List<O>> retrieveMany() {
-        return retrieveMany(null);
+    public EAAction<PaginatedResponse<O>> retrievePage(@Nullable Map<String, Object> queryParams) {
+        return retrievePage(null, null, queryParams);
     }
 
+    /**
+     * Retrieves a specific page with a specific limit
+     *
+     * @param   page        1-indexed page number
+     * @param   limit       maximum items per page
+     * @param   queryParams optional query parameters (page/limit are ignored)
+     *
+     * @return  action yielding a {@link PaginatedResponse}
+     */
+    @NotNull
+    public EAAction<PaginatedResponse<O>> retrievePage(@Nullable Integer page, @Nullable Integer limit, @Nullable Map<String, Object> queryParams) {
+        return new EAAction<>("GET " + getPath(), () -> executePage(queryParams, page, limit));
+    }
+
+    /**
+     * Auto-paginates to collect exactly {@code count} items (or fewer if the API has less)
+     *
+     * @param   count   total items to collect
+     *
+     * @return  action yielding the accumulated list
+     */
+    @NotNull
+    public EAAction<List<O>> retrieveMany(int count) {
+        return retrieveMany(count, null, null);
+    }
+
+    /**
+     * Auto-paginates to collect exactly {@code count} items (or fewer if the API has less)
+     *
+     * @param   count       total items to collect
+     * @param   startPage   optional page to start from (1-indexed)
+     *
+     * @return  action yielding the accumulated list
+     */
+    @NotNull
+    public EAAction<List<O>> retrieveMany(int count, @Nullable Integer startPage) {
+        return retrieveMany(count, startPage, null);
+    }
+
+    /**
+     * Auto-paginates to collect exactly {@code count} items (or fewer if the API has less)
+     *
+     * @param   count       total items to collect
+     * @param   queryParams optional query parameters (page/limit are ignored)
+     *
+     * @return  action yielding the accumulated list
+     */
+    @NotNull
+    public EAAction<List<O>> retrieveMany(int count, @Nullable Map<String, Object> queryParams) {
+        return retrieveMany(count, null, queryParams);
+    }
+
+    /**
+     * Auto-paginates to collect exactly {@code count} items (or fewer if the API has less)
+     *
+     * @param   count       total items to collect
+     * @param   startPage   optional page to start from (1-indexed)
+     * @param   queryParams optional query parameters (page/limit are ignored)
+     *
+     * @return  action yielding the accumulated list
+     */
+    @NotNull
+    public EAAction<List<O>> retrieveMany(int count, @Nullable Integer startPage, @Nullable Map<String, Object> queryParams) {
+        return new EAAction<>("GET " + getPath(), () -> {
+            final List<O> result = new ArrayList<>();
+            int page = (startPage != null && startPage > 0) ? startPage : 1;
+            int remaining = count;
+            while (remaining > 0) {
+                final int limit = Math.min(remaining, 50);
+                final PaginatedResponse<O> response = executePage(queryParams, page, limit);
+                result.addAll(response.items);
+                remaining -= response.count;
+                if (response.count < limit || result.size() >= response.total) break;
+                page++;
+            }
+            return result;
+        });
+    }
+
+    /**
+     * Retrieves a single object with a path and returns it wrapped in a {@link EAItemData}
+     *
+     * @param   pathSegments    the path segments to append to the endpoint path
+     *
+     * @return  action yielding the retrieved object wrapped in an {@link EAItemData}
+     */
+    @NotNull
+    public EAAction<EAItemData<O>> retrieveOneData(@NotNull String... pathSegments) {
+        return new EAAction<>("GET " + getPath(), () -> executeOne(pathSegments));
+    }
+
+    /**
+     * Retrieves a single object with a path
+     *
+     * @param   pathSegments    the path segments to append to the endpoint path
+     *
+     * @return  action yielding the retrieved object
+     */
     @NotNull
     public EAAction<O> retrieveOne(@NotNull String... pathSegments) {
-        return new EAAction<>("GET " + getPath(), () -> executeOne(pathSegments));
+        return retrieveOneData(pathSegments).map(data -> data.item);
     }
 
     @NotNull
@@ -81,21 +198,45 @@ public abstract class EAEndpoint<O extends EAObject> {
         // Get response
         final int statusCode = connection.getResponseCode();
         final String body = readBody(statusCode >= 400 ? connection.getErrorStream() : connection.getInputStream());
-        final JsonObject json = parseJson(body);
+        final JsonObject json = GSONProvider.GSON.fromJson(body, JsonObject.class);
         if (json == null) {
             if (statusCode >= 400) throw new EAHttpResponseException(statusCode, connection.getResponseMessage(), body);
             throw new EAHttpRequestException("GET " + endpointPath, new IllegalStateException("Failed to parse JSON response"));
         }
 
         // Error
-        if (statusCode >= 400 || isErrorPayload(json)) throw toResponseException(statusCode, json, body);
+        if (statusCode >= 400 || json.has("message")) {
+            // Get response code
+            int responseCode = statusCode;
+            if (json.has("code")) try {
+                responseCode = json.get("code").getAsInt();
+            } catch (final Exception ignored) {}
+
+            // Get message
+            String message = null;
+            if (json.has("message")) try {
+                message = json.get("message").getAsString();
+            } catch (final Exception ignored) {
+                throw new EAHttpResponseException(responseCode, "Unexpected error payload", body);
+            }
+
+            // Throw exception
+            throw new EAHttpResponseException(responseCode, message, body);
+        }
 
         // Get raw object
         final JsonElement raw = json.has(objectField) ? json.get(objectField) : null;
         if (raw == null) throw new EAHttpResponseException(statusCode, "Missing field '" + objectField + "'", body);
 
+        // Parse pagination fields
+        final int page = getIntField(json, "page");
+        final int limit = getIntField(json, "limit");
+        final int count = getIntField(json, "count");
+        final int total = getIntField(json, "total");
+        final int all = getIntField(json, "all");
+
         // Return details
-        return new ConnectionDetails(connection, statusCode, body, raw);
+        return new ConnectionDetails(connection, statusCode, body, raw, page, limit, count, total, all);
     }
 
     protected static class ConnectionDetails {
@@ -103,27 +244,46 @@ public abstract class EAEndpoint<O extends EAObject> {
         private final int statusCode;
         @NotNull private final String body;
         @NotNull private final JsonElement raw;
+        private final int page;
+        private final int limit;
+        private final int count;
+        private final int total;
+        private final int all;
 
-        private ConnectionDetails(@NotNull HttpURLConnection connection, int statusCode, @NotNull String body, @NotNull JsonElement raw) {
+        private ConnectionDetails(@NotNull HttpURLConnection connection, int statusCode, @NotNull String body, @NotNull JsonElement raw, int page, int limit, int count, int total, int all) {
             this.connection = connection;
             this.statusCode = statusCode;
             this.body = body;
             this.raw = raw;
+            this.page = page;
+            this.limit = limit;
+            this.count = count;
+            this.total = total;
+            this.all = all;
         }
     }
 
     @NotNull
-    private List<O> executeMany(@Nullable Map<String, Object> queryParams) {
+    private PaginatedResponse<O> executePage(@Nullable Map<String, Object> queryParams, @Nullable Integer page, @Nullable Integer limit) {
+        final Map<String, Object> params = new HashMap<>();
+        if (queryParams != null) params.putAll(queryParams);
+        if (page != null) params.put("page", page);
+        if (limit != null) params.put("limit", limit);
+
         final String endpointPath = getPath();
+        final String objectField = getPaginatedFieldName();
+
         HttpURLConnection connection = null;
         try {
             // Open connection and get details
-            final ConnectionDetails details = openConnection(endpointPath, endpointPath, queryParams);
+            final ConnectionDetails details = openConnection(endpointPath, objectField, params);
             connection = details.connection;
 
             // Parse objects
-            final List<O> objects = GSONProvider.GSON.fromJson(details.raw, GSONProvider.typeOf(List.class, getObjectType()));
-            return objects != null ? objects : Collections.emptyList();
+            List<O> items = GSONProvider.GSON.fromJson(details.raw, GSONProvider.typeOf(List.class, getObjectType()));
+            if (items == null) items = Collections.emptyList();
+            return new PaginatedResponse<>(objectField, items, details.page, details.limit, details.count, details.total, details.all,
+                (fetcherPage, fetcherLimit) -> retrievePage(fetcherPage, fetcherLimit, queryParams));
         } catch (final RuntimeException e) {
             throw e;
         } catch (final Exception e) {
@@ -134,9 +294,10 @@ public abstract class EAEndpoint<O extends EAObject> {
     }
 
     @NotNull
-    private O executeOne(@Nullable String... pathSegments) {
+    private EAItemData<O> executeOne(@Nullable String... pathSegments) {
         final String endpointPath = getPath();
-        final String objectField = endpointPath.endsWith("s") ? endpointPath.substring(0, endpointPath.length() - 1) : endpointPath;
+        final String objectField = getSingleFieldName();
+
         HttpURLConnection connection = null;
         try {
             // Open connection and get details
@@ -146,22 +307,13 @@ public abstract class EAEndpoint<O extends EAObject> {
             // Parse object
             final O object = GSONProvider.GSON.fromJson(details.raw, getObjectType());
             if (object == null) throw new EAHttpResponseException(details.statusCode, "Failed to parse object field '" + objectField + "'", details.body);
-            return object;
+            return new EAItemData<>(objectField, object);
         } catch (final RuntimeException e) {
             throw e;
         } catch (final Exception e) {
             throw new EAHttpRequestException("GET " + endpointPath, e);
         } finally {
             if (connection != null) connection.disconnect();
-        }
-    }
-
-    @Nullable
-    private JsonObject parseJson(@NotNull String body) {
-        try {
-            return GSONProvider.GSON.fromJson(body, JsonObject.class);
-        } catch (final Exception e) {
-            return null;
         }
     }
 
@@ -176,33 +328,11 @@ public abstract class EAEndpoint<O extends EAObject> {
         return body.toString();
     }
 
-    private boolean isErrorPayload(@Nullable JsonObject json) {
-        return json != null && json.has("message");
-    }
-
-    @NotNull
-    private EAHttpResponseException toResponseException(int statusCode, @Nullable JsonObject json, @NotNull String body) {
-        final int responseCode = extractResponseCode(json, statusCode);
-        final String message;
-        if (json != null && json.has("message")) {
-            try {
-                message = json.get("message").getAsString();
-            } catch (final Exception ignored) {
-                return new EAHttpResponseException(responseCode, "Unexpected error payload", body);
-            }
-        } else {
-            message = null;
-        }
-        return new EAHttpResponseException(responseCode, message, body);
-    }
-
-    private int extractResponseCode(@Nullable JsonObject json, int fallbackStatusCode) {
-        if (json == null || !json.has("code")) return fallbackStatusCode;
-        try {
-            return json.get("code").getAsInt();
-        } catch (final Exception ignored) {
-            return fallbackStatusCode;
-        }
+    private int getIntField(@NotNull JsonObject json, @NotNull String field) {
+        if (json.has(field)) try {
+            return json.get(field).getAsInt();
+        } catch (final Exception ignored) {}
+        return 0;
     }
 
     @NotNull
