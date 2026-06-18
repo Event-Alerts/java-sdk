@@ -2,6 +2,7 @@ package gg.eventalerts.core.json;
 
 import gg.eventalerts.sdk.json.GSONProvider;
 import gg.eventalerts.sdk.object.EAEvent;
+import gg.eventalerts.sdk.object.EAObject;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
 
@@ -40,5 +41,10 @@ class JsonAdapterBehaviorTest {
         assertNull(GSONProvider.GSON.fromJson("{}", Integer.class));
         assertNull(GSONProvider.GSON.fromJson("{}", Double.class));
         assertNull(GSONProvider.GSON.fromJson("{}", Boolean.class));
+    }
+
+    @Test
+    void eaObjectAdapterReturnsNullOnNull() {
+        assertNull(GSONProvider.GSON.fromJson("null", EAObject.class));
     }
 }

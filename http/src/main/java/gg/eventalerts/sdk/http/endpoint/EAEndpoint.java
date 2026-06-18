@@ -236,13 +236,11 @@ public abstract class EAEndpoint<O extends EAObject> {
         final int all = getIntField(json, "all");
 
         // Return details
-        return new ConnectionDetails(connection, statusCode, body, raw, page, limit, count, total, all);
+        return new ConnectionDetails(connection, raw, page, limit, count, total, all);
     }
 
     protected static class ConnectionDetails {
         @NotNull private final HttpURLConnection connection;
-        private final int statusCode;
-        @NotNull private final String body;
         @NotNull private final JsonElement raw;
         private final int page;
         private final int limit;
@@ -250,10 +248,8 @@ public abstract class EAEndpoint<O extends EAObject> {
         private final int total;
         private final int all;
 
-        private ConnectionDetails(@NotNull HttpURLConnection connection, int statusCode, @NotNull String body, @NotNull JsonElement raw, int page, int limit, int count, int total, int all) {
+        private ConnectionDetails(@NotNull HttpURLConnection connection, @NotNull JsonElement raw, int page, int limit, int count, int total, int all) {
             this.connection = connection;
-            this.statusCode = statusCode;
-            this.body = body;
             this.raw = raw;
             this.page = page;
             this.limit = limit;
@@ -305,9 +301,7 @@ public abstract class EAEndpoint<O extends EAObject> {
             connection = details.connection;
 
             // Parse object
-            final O object = GSONProvider.GSON.fromJson(details.raw, getObjectType());
-            if (object == null) throw new EAHttpResponseException(details.statusCode, "Failed to parse object field '" + objectField + "'", details.body);
-            return new EAItemData<>(objectField, object);
+            return new EAItemData<>(objectField, GSONProvider.GSON.fromJson(details.raw, getObjectType()));
         } catch (final RuntimeException e) {
             throw e;
         } catch (final Exception e) {
