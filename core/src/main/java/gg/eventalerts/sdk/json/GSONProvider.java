@@ -25,6 +25,7 @@ public final class GSONProvider {
             .registerTypeAdapter(Date.class, new DateAdapter())
             .registerTypeAdapter(Double.class, new DoubleAdapter())
             .registerTypeAdapter(double.class, new DoubleAdapter())
+            .registerTypeAdapterFactory(new EAObjectAdapter())
             .registerTypeAdapterFactory(new EnumAdapter())
             .registerTypeAdapter(Integer.class, new IntegerAdapter())
             .registerTypeAdapter(int.class, new IntegerAdapter())
