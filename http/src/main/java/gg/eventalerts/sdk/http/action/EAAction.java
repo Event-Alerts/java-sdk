@@ -2,6 +2,7 @@ package gg.eventalerts.sdk.http.action;
 
 import gg.eventalerts.sdk.http.exception.EAHttpRequestException;
 import gg.eventalerts.sdk.http.exception.EAHttpTimeoutException;
+import gg.eventalerts.sdk.http.response.PaginatedResponse;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,7 +15,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.Collections;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -331,13 +331,13 @@ public class EAAction<T> {
     }
 
     /**
-     * Replaces any failure with an empty list.
+     * Replaces any failure with an empty {@link PaginatedResponse}.
      *
-     * @return a new action that returns an empty list on failure
+     * @return a new action that returns an empty paginated response on failure
      */
     @NotNull
-    public EAAction<T> onErrorReturnEmptyList() {
-        return onErrorMap(throwable -> (T) Collections.emptyList());
+    public EAAction<T> onErrorReturnEmptyPage() {
+        return onErrorMap(throwable -> (T) PaginatedResponse.empty());
     }
 
     /**

@@ -170,12 +170,17 @@ class EAActionTest {
     }
 
     @Test
-    void onErrorMapCanReturnEmptyListFallback() throws Exception {
-        final EAAction<java.util.List<Integer>> action = new EAAction<java.util.List<Integer>>("base", () -> {
-            throw new IllegalStateException("boom");
-        }).onErrorReturnEmptyList();
+    void onErrorReturnEmptyPageReturnsPaginatedResponseWithNoItems() throws Exception {
+        final EAAction<gg.eventalerts.sdk.http.response.PaginatedResponse<gg.eventalerts.sdk.object.EAObject>> action =
+            new EAAction<gg.eventalerts.sdk.http.response.PaginatedResponse<gg.eventalerts.sdk.object.EAObject>>("base", () -> { throw new IllegalStateException("boom"); })
+                .onErrorReturnEmptyPage();
 
-        assertTrue(action.submit().get(5, TimeUnit.SECONDS).isEmpty());
+        final gg.eventalerts.sdk.http.response.PaginatedResponse<gg.eventalerts.sdk.object.EAObject> result =
+            action.submit().get(5, TimeUnit.SECONDS);
+
+        assertNotNull(result);
+        assertTrue(result.items.isEmpty());
+        assertFalse(result.hasNextPage());
     }
 
     @Test

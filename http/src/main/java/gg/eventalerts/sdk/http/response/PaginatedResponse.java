@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.BiFunction;
 
@@ -42,10 +43,11 @@ public class PaginatedResponse<O extends EAObject> extends EAPageData<O> {
     /**
      * Creates an action that fetches up to {@code count} additional items from subsequent pages.
      * <br>Items on the current page are not included.
+     * <br>Use {@link #retrieveNextPage()} instead when you need the full {@link PaginatedResponse} for a single page.
      *
      * @param   count   maximum number of additional items to fetch
      *
-     * @return  action yielding the accumulated additional items
+     * @return  action yielding the accumulated additional items as a flat list
      */
     @NotNull
     public EAAction<List<O>> retrieveMore(int count) {
@@ -63,5 +65,19 @@ public class PaginatedResponse<O extends EAObject> extends EAPageData<O> {
             }
             return result;
         });
+    }
+
+    /**
+     * Creates an empty, non-pageable response with no items.
+     * <br>Useful as a safe fallback with {@link gg.eventalerts.sdk.http.action.EAAction#onErrorReturnEmptyPage()}.
+     *
+     * @param   <O> the item type
+     *
+     * @return  an empty {@link PaginatedResponse} where {@link #hasNextPage()} is always {@code false}
+     */
+    @NotNull
+    public static <O extends EAObject> PaginatedResponse<O> empty() {
+        return new PaginatedResponse<>("", Collections.emptyList(), 1, 0, 0, 0, 0,
+                (page, limit) -> { throw new IllegalStateException("Cannot paginate an empty PaginatedResponse"); });
     }
 }
