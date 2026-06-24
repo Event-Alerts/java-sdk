@@ -7,6 +7,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
+import java.util.Collections;
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -170,6 +173,21 @@ public class EAAction<T> {
     @NotNull
     public <R> EAAction<R> map(@NotNull Function<? super T, ? extends R> mapper) {
         return new EAAction<>(description + " -> map", ignored -> submit().thenApply(mapper));
+    }
+
+    /**
+     * Filters a successful result.
+     *
+     * @param   predicate   the success-value predicate
+     *
+     * @return  a new filtered action
+     */
+    @NotNull
+    public EAAction<T> filter(@NotNull Predicate<? super T> predicate) {
+        return new EAAction<>(description + " -> filter", ignored -> submit().thenApply(value -> {
+            if (value != null && !predicate.test(value)) throw new NoSuchElementException("Filter predicate failed for: " + description);
+            return value;
+        }));
     }
 
     /**
@@ -338,6 +356,16 @@ public class EAAction<T> {
     @NotNull
     public EAAction<T> onErrorReturnEmptyPage() {
         return onErrorMap(throwable -> (T) PaginatedResponse.empty());
+    }
+
+    /**
+     * Replaces any failure with an empty {@link List}.
+     *
+     * @return  a new action that returns an empty list on failure
+     */
+    @NotNull
+    public EAAction<T> onErrorReturnEmptyList() {
+        return onErrorMap(throwable -> (T) Collections.emptyList());
     }
 
     /**
