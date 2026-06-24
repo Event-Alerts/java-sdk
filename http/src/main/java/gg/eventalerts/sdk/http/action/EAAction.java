@@ -118,10 +118,10 @@ public class EAAction<T> {
      * If the action fails and {@code failure} is present, the failure callback receives the throwable.
      * If the action succeeds with {@code null}, neither callback is invoked.
      *
-     * @param success the success callback, or {@code null} to ignore a present value
+     * @param success the success callback
      * @param failure the failure callback, or {@code null} to use the default failure handling
      */
-    public void ifPresent(@Nullable Consumer<? super T> success, @Nullable Consumer<? super Throwable> failure) {
+    public void ifPresent(@NotNull Consumer<? super T> success, @Nullable Consumer<? super Throwable> failure) {
         submit().whenComplete((value, throwable) -> {
             if (throwable != null) {
                 handleFailure(unwrap(throwable), failure);
@@ -130,7 +130,7 @@ public class EAAction<T> {
 
             if (value == null) return;
             try {
-                if (success != null) success.accept(value);
+                success.accept(value);
             } catch (final Throwable error) {
                 handleFailure(error, failure);
             }
@@ -142,7 +142,7 @@ public class EAAction<T> {
      *
      * @param success the success callback, or {@code null} to ignore a present value
      */
-    public void ifPresent(@Nullable Consumer<? super T> success) {
+    public void ifPresent(@NotNull Consumer<? super T> success) {
         ifPresent(success, getDefaultFailure());
     }
 
