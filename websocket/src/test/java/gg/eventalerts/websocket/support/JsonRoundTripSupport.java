@@ -1,5 +1,6 @@
 package gg.eventalerts.websocket.support;
 
+import com.google.gson.reflect.TypeToken;
 import gg.eventalerts.sdk.json.GSONProvider;
 import org.jetbrains.annotations.NotNull;
 
@@ -19,6 +20,6 @@ public final class JsonRoundTripSupport {
 
     @NotNull
     public static Type typeOf(@NotNull Class<?> rawType, @NotNull Class<?>... typeArguments) {
-        return GSONProvider.typeOf(rawType, typeArguments);
+        return TypeToken.getParameterized(rawType, typeArguments).getType();
     }
 }

@@ -2,6 +2,7 @@ package gg.eventalerts.sdk.http.endpoint;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonElement;
+import com.google.gson.reflect.TypeToken;
 import gg.eventalerts.sdk.http.EAHTTP;
 import gg.eventalerts.sdk.http.response.PaginatedResponse;
 import gg.eventalerts.sdk.http.action.EAAction;
@@ -276,7 +277,7 @@ public abstract class EAEndpoint<O extends EAObject> {
             connection = details.connection;
 
             // Parse objects
-            List<O> items = GSONProvider.GSON.fromJson(details.raw, GSONProvider.typeOf(List.class, getObjectType()));
+            List<O> items = GSONProvider.GSON.fromJson(details.raw, TypeToken.getParameterized(List.class, getObjectType()).getType());
             if (items == null) items = Collections.emptyList();
             return new PaginatedResponse<>(objectField, items, details.page, details.limit, details.count, details.total, details.all,
                 (fetcherPage, fetcherLimit) -> retrievePage(fetcherPage, fetcherLimit, queryParams));

@@ -2,7 +2,6 @@ package gg.eventalerts.sdk.json;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.internal.$Gson$Types;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import gg.eventalerts.sdk.json.adapters.*;
@@ -12,7 +11,6 @@ import org.bson.types.ObjectId;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Type;
 import java.util.Date;
 import java.util.UUID;
 
@@ -36,11 +34,6 @@ public final class GSONProvider {
             .registerTypeAdapter(UUID.class, new UUIDAdapter())
             .registerTypeAdapterFactory(new CollectionAdapter())
             .create();
-
-    @NotNull
-    public static Type typeOf(@NotNull Class<?> raw, @NotNull Type... args) {
-        return $Gson$Types.newParameterizedTypeWithOwner(null, raw, args);
-    }
 
     @Nullable
     public static JsonToken peek(@NotNull JsonReader in) {

@@ -1,7 +1,7 @@
 package gg.eventalerts.sdk.websocket.message;
 
 import com.google.gson.annotations.SerializedName;
-import gg.eventalerts.sdk.json.GSONProvider;
+import com.google.gson.reflect.TypeToken;
 import gg.eventalerts.sdk.object.EAObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -26,6 +26,6 @@ public class SocketMessage<T extends EAObject> extends EAObject {
 
     @Override @NotNull
     public Type getType() {
-        return data != null ? GSONProvider.typeOf(this.getClass(), data.getClass()) : super.getType();
+        return data != null ? TypeToken.getParameterized(this.getClass(), data.getClass()).getType() : super.getType();
     }
 }

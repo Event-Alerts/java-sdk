@@ -1,5 +1,6 @@
 package gg.eventalerts.core.json;
 
+import com.google.gson.reflect.TypeToken;
 import gg.eventalerts.sdk.json.GSONProvider;
 import gg.eventalerts.sdk.object.EAEvent;
 import gg.eventalerts.sdk.object.EAObject;
@@ -27,7 +28,7 @@ class JsonAdapterBehaviorTest {
 
     @Test
     void invalidSetMembersAreDroppedInsteadOfBreakingParsing() {
-        final Type type = GSONProvider.typeOf(Set.class, EAEvent.PingRole.class);
+        final Type type = TypeToken.getParameterized(Set.class, EAEvent.PingRole.class).getType();
 
         assertEquals(
                 Collections.singleton(EAEvent.PingRole.PARTNER),

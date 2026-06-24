@@ -1,6 +1,7 @@
 package gg.eventalerts.sdk.websocket.handler;
 
 import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import gg.eventalerts.sdk.json.GSONProvider;
 import gg.eventalerts.sdk.object.EAObject;
 import gg.eventalerts.sdk.websocket.SocketEventName;
@@ -19,7 +20,7 @@ public abstract class SocketEventHandler<O extends EAObject> {
     public abstract void onMessage(@NotNull SocketEvent<O> object);
 
     public final void onMessage(@NotNull JsonObject json) {
-        final SocketEvent<O> event = GSONProvider.GSON.fromJson(json, GSONProvider.typeOf(SocketEvent.class, getName().getObjectType()));
+        final SocketEvent<O> event = GSONProvider.GSON.fromJson(json, TypeToken.getParameterized(SocketEvent.class, getName().getObjectType()).getType());
         if (event != null) onMessage(event);
     }
 }
