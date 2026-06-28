@@ -11,7 +11,7 @@ import xyz.srnyx.gradlegalaxy.utility.setupTesting
 
 plugins {
     base
-    id("xyz.srnyx.gradle-galaxy") version "bd1b0c1" apply false
+    id("xyz.srnyx.gradle-galaxy") version "8d36906" apply false
 }
 
 subprojects {
