@@ -1,3 +1,4 @@
+import xyz.srnyx.gradlegalaxy.data.config.DependencyConfig
 import xyz.srnyx.gradlegalaxy.data.config.JavaSetupConfig
 import xyz.srnyx.gradlegalaxy.data.config.publishing.publishingSimpleConfig
 import xyz.srnyx.gradlegalaxy.data.pom.DeveloperData
@@ -6,10 +7,11 @@ import xyz.srnyx.gradlegalaxy.enums.Repository
 import xyz.srnyx.gradlegalaxy.enums.repository
 import xyz.srnyx.gradlegalaxy.utility.setupJava
 import xyz.srnyx.gradlegalaxy.utility.setupPublishingEnv
+import xyz.srnyx.gradlegalaxy.utility.setupTesting
 
 plugins {
     base
-    id("xyz.srnyx.gradle-galaxy") version "3.0.1" apply false
+    id("xyz.srnyx.gradle-galaxy") version "bd1b0c1" apply false
 }
 
 subprojects {
@@ -18,26 +20,18 @@ subprojects {
 
     setupJava(config = JavaSetupConfig(
         group = "gg.eventalerts",
-        version = "0.0.1",
         javaVersion = JavaVersion.VERSION_1_8))
 
     repository(Repository.SRNYX_RELEASES, Repository.SRNYX_SNAPSHOTS, Repository.MAVEN_CENTRAL)
 
-    val annotations = "org.jetbrains:annotations:26.1.0"
     dependencies {
+        val annotations = "org.jetbrains:annotations:26.1.0"
         add("compileOnly", annotations)
-
-        // Unit tests
         add("testCompileOnly", annotations)
-        add("testRuntimeOnly", "org.junit.platform:junit-platform-launcher")
-        add("testImplementation", platform("org.junit:junit-bom:5.14.4"))
-        add("testImplementation", "org.junit.jupiter:junit-jupiter")
     }
 
     // Setup testing
-    tasks.withType<Test>().configureEach {
-        useJUnitPlatform()
-    }
+    setupTesting(junitBomConfig = DependencyConfig(version = "5.14.4"))
 
     // Setup publishing
     setupPublishingEnv(publishingSimpleConfig(
@@ -61,14 +55,8 @@ val copyJarsTask = tasks.register<Copy>("copyJars") {
     })
     into(layout.buildDirectory.dir("libs"))
 }
-tasks.named("build") {
-    dependsOn(copyJarsTask)
-}
+tasks.named("build") { dependsOn(copyJarsTask) }
 
 // Run all subproject checks
-tasks.named("check") {
-    dependsOn(subprojects.map { it.tasks.named("check") })
-}
-tasks.named("assemble") {
-    dependsOn(subprojects.map { it.tasks.named("assemble") })
-}
+tasks.named("check") { dependsOn(subprojects.map { it.tasks.named("check") }) }
+tasks.named("assemble") { dependsOn(subprojects.map { it.tasks.named("assemble") }) }

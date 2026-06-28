@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 class EAWebSocketIntegrationTest {
-    private static final int PORT = 2020;
+    private static final int PORT = 5252;
     private static final String SOCKET_URL = "ws://localhost:" + PORT + "/api/v1/socket";
 
     private static WebSocketFixtureServer server;
