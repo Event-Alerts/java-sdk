@@ -227,7 +227,6 @@ public abstract class EAEndpoint<O extends EAObject> {
 
         // Get raw object
         final JsonElement raw = json.has(objectField) ? json.get(objectField) : null;
-        if (raw == null) throw new EAHttpResponseException(statusCode, "Missing field '" + objectField + "'", body);
 
         // Parse pagination fields
         final int page = getIntField(json, "page");
@@ -242,14 +241,14 @@ public abstract class EAEndpoint<O extends EAObject> {
 
     protected static class ConnectionDetails {
         @NotNull private final HttpURLConnection connection;
-        @NotNull private final JsonElement raw;
+        @Nullable private final JsonElement raw;
         private final int page;
         private final int limit;
         private final int count;
         private final int total;
         private final int all;
 
-        private ConnectionDetails(@NotNull HttpURLConnection connection, @NotNull JsonElement raw, int page, int limit, int count, int total, int all) {
+        private ConnectionDetails(@NotNull HttpURLConnection connection, @Nullable JsonElement raw, int page, int limit, int count, int total, int all) {
             this.connection = connection;
             this.raw = raw;
             this.page = page;
@@ -277,8 +276,13 @@ public abstract class EAEndpoint<O extends EAObject> {
             connection = details.connection;
 
             // Parse objects
-            List<O> items = GSONProvider.GSON.fromJson(details.raw, TypeToken.getParameterized(List.class, getObjectType()).getType());
-            if (items == null) items = Collections.emptyList();
+            List<O> items = Collections.emptyList();
+            if (details.raw != null) {
+                final List<O> fromJson = GSONProvider.GSON.fromJson(details.raw, TypeToken.getParameterized(List.class, getObjectType()).getType());
+                if (fromJson != null) items = fromJson;
+            }
+
+            // Build and return PaginatedResponse
             return new PaginatedResponse<>(objectField, items, details.page, details.limit, details.count, details.total, details.all,
                 (fetcherPage, fetcherLimit) -> retrievePage(fetcherPage, fetcherLimit, queryParams));
         } catch (final RuntimeException e) {
@@ -302,7 +306,11 @@ public abstract class EAEndpoint<O extends EAObject> {
             connection = details.connection;
 
             // Parse object
-            return new EAItemData<>(objectField, GSONProvider.GSON.fromJson(details.raw, getObjectType()));
+            O item = null;
+            if (details.raw != null) item = GSONProvider.GSON.fromJson(details.raw, getObjectType());
+
+            // Build and return EAItemData
+            return new EAItemData<>(objectField, item);
         } catch (final RuntimeException e) {
             throw e;
         } catch (final Exception e) {
