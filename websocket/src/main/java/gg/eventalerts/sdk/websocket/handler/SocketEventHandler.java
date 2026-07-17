@@ -17,7 +17,7 @@ public abstract class SocketEventHandler<O extends EAObject> {
         return true;
     }
 
-    public abstract void onMessage(@NotNull SocketEvent<O> object);
+    public abstract void onMessage(@NotNull SocketEvent<O> socketEvent);
 
     public final void onMessage(@NotNull JsonObject json) {
         final SocketEvent<O> event = GSONProvider.GSON.fromJson(json, TypeToken.getParameterized(SocketEvent.class, getName().getObjectType()).getType());

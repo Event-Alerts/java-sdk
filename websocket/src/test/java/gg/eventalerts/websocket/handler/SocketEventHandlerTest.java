@@ -49,8 +49,8 @@ class SocketEventHandlerTest {
         private final AtomicReference<SocketEvent<EAEvent>> captured = new AtomicReference<>();
 
         @Override
-        public void onMessage(@NotNull SocketEvent<EAEvent> object) {
-            captured.set(object);
+        public void onMessage(@NotNull SocketEvent<EAEvent> socketEvent) {
+            captured.set(socketEvent);
         }
     }
 }
