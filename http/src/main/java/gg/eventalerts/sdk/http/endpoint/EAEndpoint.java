@@ -18,6 +18,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -183,7 +184,31 @@ public abstract class EAEndpoint<O extends EAObject> {
             for (final Map.Entry<String, Object> entry : queryParams.entrySet()) {
                 if (!first) queryString.append("&");
                 first = false;
-                queryString.append(encode(entry.getKey())).append("=").append(encode(String.valueOf(entry.getValue())));
+
+                final StringBuilder builder = new StringBuilder(encode(entry.getKey()));
+                final Object value = entry.getValue();
+                if (value != null) {
+                    builder.append("=");
+
+                    if (value instanceof Collection<?>) {
+                        // Collection
+                        final Collection<?> collection = (Collection<?>) value;
+                        if (!collection.isEmpty()) {
+                            for (final Object item : collection) builder.append(encode(String.valueOf(item))).append(",");
+                            builder.deleteCharAt(builder.length() - 1);
+                        }
+                    } else if (value.getClass().isArray()) {
+                        // Array
+                        final int length = Array.getLength(value);
+                        if (length > 0) {
+                            for (int i = 0; i < length; i++) builder.append(encode(String.valueOf(Array.get(value, i)))).append(",");
+                            builder.deleteCharAt(builder.length() - 1);
+                        }
+                    } else {
+                        builder.append(encode(String.valueOf(value)));
+                    }
+                }
+                queryString.append(builder);
             }
         }
 
