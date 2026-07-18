@@ -24,6 +24,14 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 
+/**
+ * Overrideable:
+ * <ul>
+ *   <li>{@link #shouldSend(SocketActionName, SocketAction)}
+ *   <li>{@link #beforeSend(SocketActionName, SocketAction)}
+ *   <li>{@link #afterSend(SocketActionName, SocketAction)}
+ * </ul>
+ */
 public class EAWebSocket extends WebSocketClient {
     @NotNull public static final Logger LOGGER = LoggerFactory.getLogger(EAWebSocket.class);
     @NotNull private static final ScheduledExecutorService RETRY_SCHEDULER = Executors.newSingleThreadScheduledExecutor(runnable -> {
@@ -40,6 +48,7 @@ public class EAWebSocket extends WebSocketClient {
     @NotNull public Duration retryDelay;
 
     // Variables
+    private boolean shuttingDown = false;
     @Nullable private ScheduledFuture<?> retryTask;
 
     // Stats
@@ -86,19 +95,29 @@ public class EAWebSocket extends WebSocketClient {
         send(SocketActionName.UPDATE_SUBSCRIPTION, new EAUpdateSubscriptionAction(subscribe, unsubscribe));
     }
 
-    public void retryConnection(@NotNull String reason) {
-        if (retryTask != null || !retry) return;
+    public void shutdown(@Nullable String reason) {
+        shuttingDown = true;
+        if (retryTask != null) {
+            retryTask.cancel(false);
+            retryTask = null;
+        }
+        close(1000, reason != null ? reason : "Shutting down");
+    }
 
-        // Close connection
-        close(1001, "Retrying connection");
+    public void retryConnection(@NotNull String reason) {
+        if (retryTask != null || !retry || shuttingDown) return;
 
         // Schedule retry
         LOGGER.info("We will try to reconnect to the websocket in {} due to: {}", formatRetryDelay(retryDelay), reason);
         retryTask = RETRY_SCHEDULER.schedule(() -> {
-            LOGGER.info("Retrying websocket connection with reason: {}", reason);
             retryTask = null;
+            if (shuttingDown) return;
+            LOGGER.info("Retrying websocket connection with reason: {}", reason);
             reconnect();
         }, retryDelay.toMillis(), TimeUnit.MILLISECONDS);
+
+        // Close connection
+        close(1001, "Retrying connection");
     }
 
     @NotNull
@@ -283,6 +302,9 @@ public class EAWebSocket extends WebSocketClient {
             return new EAWebSocket(url, EventAlertsSDK.createHeaders(headers, userAgent, bearerToken, playerKey, serverKey), handlers, retry, retryDelay);
         }
 
+        /**
+         * {@link #build()} followed by {@link EAWebSocket#connect()} (non-blocking)
+         */
         @NotNull
         public EAWebSocket buildThenConnect() {
             final EAWebSocket socket = build();
