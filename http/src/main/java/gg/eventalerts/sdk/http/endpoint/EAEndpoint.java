@@ -175,7 +175,7 @@ public abstract class EAEndpoint<O extends EAObject> {
     }
 
     @NotNull
-    protected ConnectionDetails openConnection(@NotNull String endpointPath, @NotNull String objectField, @Nullable Map<String, Object> queryParams, @Nullable String... pathSegments) throws IOException {
+    public String buildUrl(@NotNull String endpointPath, @Nullable Map<String, Object> queryParams, @Nullable String... pathSegments) {
         // Build query parameters
         final StringBuilder queryString = new StringBuilder();
         if (queryParams != null && !queryParams.isEmpty()) {
@@ -216,8 +216,14 @@ public abstract class EAEndpoint<O extends EAObject> {
         final StringBuilder path = new StringBuilder();
         if (pathSegments != null) for (final String segment : pathSegments) path.append("/").append(segment);
 
+        // Build and return full URL
+        return http.url + endpointPath + path + queryString;
+    }
+
+    @NotNull
+    protected ConnectionDetails openConnection(@NotNull String url, @NotNull String objectField) throws IOException {
         // Open connection
-        final HttpURLConnection connection = (HttpURLConnection) URI.create(http.url + endpointPath + path + queryString).toURL().openConnection();
+        final HttpURLConnection connection = (HttpURLConnection) URI.create(url).toURL().openConnection();
         connection.setRequestMethod("GET");
         for (final Map.Entry<String, String> header : http.headers.entrySet()) connection.setRequestProperty(header.getKey(), header.getValue());
 
@@ -227,7 +233,7 @@ public abstract class EAEndpoint<O extends EAObject> {
         final JsonObject json = GSONProvider.GSON.fromJson(body, JsonObject.class);
         if (json == null) {
             if (statusCode >= 400) throw new EAHttpResponseException(statusCode, connection.getResponseMessage(), body);
-            throw new EAHttpRequestException("GET " + endpointPath, new IllegalStateException("Failed to parse JSON response"));
+            throw new EAHttpRequestException("GET " + url, new IllegalStateException("Failed to parse JSON response"));
         }
 
         // Error
@@ -291,13 +297,13 @@ public abstract class EAEndpoint<O extends EAObject> {
         if (page != null) params.put("page", page);
         if (limit != null) params.put("limit", limit);
 
-        final String endpointPath = getPath();
+        final String url = buildUrl(getPath(), params);
         final String objectField = getPaginatedFieldName();
 
         HttpURLConnection connection = null;
         try {
             // Open connection and get details
-            final ConnectionDetails details = openConnection(endpointPath, objectField, params);
+            final ConnectionDetails details = openConnection(url, objectField);
             connection = details.connection;
 
             // Parse objects
@@ -313,7 +319,7 @@ public abstract class EAEndpoint<O extends EAObject> {
         } catch (final RuntimeException e) {
             throw e;
         } catch (final Exception e) {
-            throw new EAHttpRequestException("GET " + endpointPath, e);
+            throw new EAHttpRequestException("GET " + url, e);
         } finally {
             if (connection != null) connection.disconnect();
         }
@@ -321,13 +327,13 @@ public abstract class EAEndpoint<O extends EAObject> {
 
     @NotNull
     private EAItemData<O> executeOne(@Nullable String... pathSegments) {
-        final String endpointPath = getPath();
+        final String url = buildUrl(getPath(), null, pathSegments);
         final String objectField = getSingleFieldName();
 
         HttpURLConnection connection = null;
         try {
             // Open connection and get details
-            final ConnectionDetails details = openConnection(endpointPath, objectField, null, pathSegments);
+            final ConnectionDetails details = openConnection(url, objectField);
             connection = details.connection;
 
             // Parse object
@@ -339,7 +345,7 @@ public abstract class EAEndpoint<O extends EAObject> {
         } catch (final RuntimeException e) {
             throw e;
         } catch (final Exception e) {
-            throw new EAHttpRequestException("GET " + endpointPath, e);
+            throw new EAHttpRequestException("GET " + url, e);
         } finally {
             if (connection != null) connection.disconnect();
         }

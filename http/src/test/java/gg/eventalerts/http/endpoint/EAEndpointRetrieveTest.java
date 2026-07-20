@@ -10,7 +10,6 @@ import gg.eventalerts.sdk.http.endpoint.EAEvents;
 import gg.eventalerts.sdk.object.EAEvent;
 import org.bson.types.ObjectId;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -106,7 +105,7 @@ class EAEndpointRetrieveTest {
         final EAHTTP http = new EAHTTP.Builder("EventAlertsSDK/1.0").url(baseUrl).build();
         final EAEvents events = new EAEvents(http) {
             @Override @NotNull
-            protected ConnectionDetails openConnection(@NotNull String endpointPath, @NotNull String objectField, @Nullable Map<String, Object> queryParams, @Nullable String... pathSegments) throws IOException {
+            protected ConnectionDetails openConnection(@NotNull String url, @NotNull String objectField) throws IOException {
                 throw new IOException("boom");
             }
         };
@@ -125,7 +124,7 @@ class EAEndpointRetrieveTest {
         assertNotNull(event);
         assertEquals("Recovered Event", event.title);
         assertInstanceOf(EAHttpRequestException.class, captured.get());
-        assertTrue(captured.get().getMessage().contains("GET events"));
+        assertTrue(captured.get().getMessage().contains("GET " + events.buildUrl(events.getPath(), null, "broken")));
     }
 
     @Test
@@ -151,7 +150,7 @@ class EAEndpointRetrieveTest {
         final EAHTTP http = new EAHTTP.Builder("EventAlertsSDK/1.0").url(baseUrl).build();
         final EAEvents events = new EAEvents(http) {
             @Override @NotNull
-            protected ConnectionDetails openConnection(@NotNull String endpointPath, @NotNull String objectField, @Nullable Map<String, Object> queryParams, @Nullable String... pathSegments) {
+            protected ConnectionDetails openConnection(@NotNull String url, @NotNull String objectField) {
                 throw new AssertionError("fatal");
             }
         };
