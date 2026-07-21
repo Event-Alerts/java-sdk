@@ -3,6 +3,7 @@ package gg.eventalerts.sdk.http.action;
 import gg.eventalerts.sdk.http.exception.EAHttpRequestException;
 import gg.eventalerts.sdk.http.exception.EAHttpTimeoutException;
 import gg.eventalerts.sdk.http.response.PaginatedResponse;
+import org.jetbrains.annotations.CheckReturnValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -60,7 +61,7 @@ public class EAAction<T> {
         this.submitter = submitter;
     }
 
-    @NotNull
+    @NotNull @CheckReturnValue
     public CompletableFuture<T> submit() {
         try {
             return submitter.apply(null);
@@ -170,7 +171,7 @@ public class EAAction<T> {
      * @param <R> the mapped result type
      * @return a new mapped action
      */
-    @NotNull
+    @NotNull @CheckReturnValue
     public <R> EAAction<R> map(@NotNull Function<? super T, ? extends R> mapper) {
         return new EAAction<>(description + " -> map", ignored -> submit().thenApply(mapper));
     }
@@ -182,7 +183,7 @@ public class EAAction<T> {
      *
      * @return  a new filtered action
      */
-    @NotNull
+    @NotNull @CheckReturnValue
     public EAAction<T> filter(@NotNull Predicate<? super T> predicate) {
         return new EAAction<>(description + " -> filter", ignored -> submit().thenApply(value -> {
             if (value != null && !predicate.test(value)) throw new NoSuchElementException("Filter predicate failed for: " + description);
@@ -197,7 +198,7 @@ public class EAAction<T> {
      * @param <R> the downstream result type
      * @return a new flat-mapped action
      */
-    @NotNull
+    @NotNull @CheckReturnValue
     public <R> EAAction<R> flatMap(@NotNull Function<? super T, ? extends EAAction<? extends R>> mapper) {
         return new EAAction<>(description + " -> flatMap", ignored -> submit().thenCompose(value -> {
             final EAAction<? extends R> action;
@@ -223,7 +224,7 @@ public class EAAction<T> {
      * @param callback the success callback
      * @return a new action with the success tap applied
      */
-    @NotNull
+    @NotNull @CheckReturnValue
     public EAAction<T> onSuccess(@NotNull Consumer<? super T> callback) {
         return new EAAction<>(description + " -> onSuccess", ignored -> {
             final CompletableFuture<T> future = new CompletableFuture<>();
@@ -250,7 +251,7 @@ public class EAAction<T> {
      * @param callback the success callback
      * @return a new action with the success tap applied
      */
-    @NotNull
+    @NotNull @CheckReturnValue
     public EAAction<T> onSuccess(@NotNull Runnable callback) {
         return onSuccess(value -> callback.run());
     }
@@ -261,7 +262,7 @@ public class EAAction<T> {
      * @param callback the error callback
      * @return a new action with the error tap applied
      */
-    @NotNull
+    @NotNull @CheckReturnValue
     public EAAction<T> onError(@NotNull Consumer<? super Throwable> callback) {
         return new EAAction<>(description + " -> onError", ignored -> {
             final CompletableFuture<T> future = new CompletableFuture<>();
@@ -289,7 +290,7 @@ public class EAAction<T> {
      * @param callback the error callback
      * @return a new action with the error tap applied
      */
-    @NotNull
+    @NotNull @CheckReturnValue
     public EAAction<T> onError(@NotNull Runnable callback) {
         return onError(throwable -> callback.run());
     }
@@ -300,7 +301,7 @@ public class EAAction<T> {
      * @param mapper the error-to-value mapper
      * @return a new action with error mapping applied
      */
-    @NotNull
+    @NotNull @CheckReturnValue
     public EAAction<T> onErrorMap(@NotNull Function<? super Throwable, ? extends T> mapper) {
         return onErrorMap(throwable -> true, mapper);
     }
@@ -312,7 +313,7 @@ public class EAAction<T> {
      * @param mapper the error-to-value mapper
      * @return a new action with filtered error mapping applied
      */
-    @NotNull
+    @NotNull @CheckReturnValue
     public EAAction<T> onErrorMap(@NotNull Predicate<? super Throwable> filter, @NotNull Function<? super Throwable, ? extends T> mapper) {
         return new EAAction<>(description + " -> onErrorMap", ignored -> {
             final CompletableFuture<T> future = new CompletableFuture<>();
@@ -343,7 +344,7 @@ public class EAAction<T> {
      * @param value the fallback value
      * @return a new action that returns the fallback on failure
      */
-    @NotNull
+    @NotNull @CheckReturnValue
     public EAAction<T> onErrorReturn(@NotNull T value) {
         return onErrorMap(throwable -> value);
     }
@@ -353,7 +354,7 @@ public class EAAction<T> {
      *
      * @return a new action that returns an empty paginated response on failure
      */
-    @NotNull
+    @NotNull @CheckReturnValue
     public EAAction<T> onErrorReturnEmptyPage() {
         return onErrorMap(throwable -> (T) PaginatedResponse.empty());
     }
@@ -363,7 +364,7 @@ public class EAAction<T> {
      *
      * @return  a new action that returns an empty list on failure
      */
-    @NotNull
+    @NotNull @CheckReturnValue
     public EAAction<T> onErrorReturnEmptyList() {
         return onErrorMap(throwable -> (T) Collections.emptyList());
     }
@@ -373,7 +374,7 @@ public class EAAction<T> {
      *
      * @return a new action that returns {@code null} on failure
      */
-    @NotNull
+    @NotNull @CheckReturnValue
     public EAAction<T> onErrorReturnNull() {
         return onErrorMap(throwable -> null);
     }
@@ -384,7 +385,7 @@ public class EAAction<T> {
      * @param mapper the failure-to-action mapper
      * @return a new action with error flat-mapping applied
      */
-    @NotNull
+    @NotNull @CheckReturnValue
     public EAAction<T> onErrorFlatMap(@NotNull Function<? super Throwable, ? extends EAAction<? extends T>> mapper) {
         return onErrorFlatMap(throwable -> true, mapper);
     }
@@ -396,7 +397,7 @@ public class EAAction<T> {
      * @param mapper the failure-to-action mapper
      * @return a new action with filtered error flat-mapping applied
      */
-    @NotNull
+    @NotNull @CheckReturnValue
     public EAAction<T> onErrorFlatMap(@NotNull Predicate<? super Throwable> filter, @NotNull Function<? super Throwable, ? extends EAAction<? extends T>> mapper) {
         return new EAAction<>(description + " -> onErrorFlatMap", ignored -> {
             final CompletableFuture<T> future = new CompletableFuture<>();
@@ -440,7 +441,7 @@ public class EAAction<T> {
      * @param unit the delay unit
      * @return a delayed action
      */
-    @NotNull
+    @NotNull @CheckReturnValue
     public EAAction<T> delay(long delay, @NotNull TimeUnit unit) {
         return new EAAction<>(description + " -> delay", ignored -> delayed(delay, unit).thenCompose(unused -> submit()));
     }
@@ -451,7 +452,7 @@ public class EAAction<T> {
      * @param duration the delay duration
      * @return a delayed action
      */
-    @NotNull
+    @NotNull @CheckReturnValue
     public EAAction<T> delay(@NotNull Duration duration) {
         return delay(duration.toMillis(), TimeUnit.MILLISECONDS);
     }
@@ -463,13 +464,13 @@ public class EAAction<T> {
      * @param unit the timeout unit
      * @return a timeout-wrapped action
      */
-    @NotNull
+    @NotNull @CheckReturnValue
     public EAAction<T> timeout(long timeout, @NotNull TimeUnit unit) {
         final long timeoutMillis = unit.toMillis(timeout);
         return new EAAction<>(description + " -> timeout", ignored -> withTimeout(submit(), timeoutMillis));
     }
 
-    @NotNull
+    @NotNull @CheckReturnValue
     private static <T> CompletableFuture<T> submitCallable(@NotNull Callable<T> task) {
         final CompletableFuture<T> future = new CompletableFuture<>();
         EXECUTOR.execute(() -> {
@@ -482,7 +483,7 @@ public class EAAction<T> {
         return future;
     }
 
-    @NotNull
+    @NotNull @CheckReturnValue
     private static <T> CompletableFuture<T> withTimeout(@NotNull CompletableFuture<T> source, long timeoutMillis) {
         if (timeoutMillis <= 0) return source;
 
@@ -502,7 +503,7 @@ public class EAAction<T> {
         return result;
     }
 
-    @NotNull
+    @NotNull @CheckReturnValue
     private static CompletableFuture<Void> delayed(long delay, @NotNull TimeUnit unit) {
         final CompletableFuture<Void> future = new CompletableFuture<>();
         SCHEDULER.schedule(() -> future.complete(null), delay, unit);
@@ -549,5 +550,35 @@ public class EAAction<T> {
             LOGGER.log(Level.SEVERE, "Unhandled failure while executing " + description, t);
             if (t instanceof Error) throw (Error) t;
         };
+    }
+
+    /**
+     * Creates an action with an already-completed value
+     *
+     * @param   value   the completed value (nullable)
+     *
+     * @return  a new action that is already completed with the given value
+     *
+     * @param   <O> the completed value type
+     */
+    @NotNull
+    public static <O> EAAction<O> completed(@Nullable O value) {
+        return new EAAction<>("COMPLETED", ignored -> {
+            final CompletableFuture<O> future = new CompletableFuture<>();
+            future.complete(value);
+            return future;
+        });
+    }
+
+    /**
+     * Creates an action with an already-completed value of {@code null}
+     *
+     * @return  a new action that is already completed with {@code null}
+     *
+     * @param   <O> the completed value type
+     */
+    @NotNull
+    public static <O> EAAction<O> completed() {
+        return completed(null);
     }
 }
