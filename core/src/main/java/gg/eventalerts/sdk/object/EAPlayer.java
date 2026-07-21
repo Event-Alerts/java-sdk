@@ -89,14 +89,14 @@ public class EAPlayer extends EAObject {
         @NotNull public static final String KEY_USERNAME = "username";
         @NotNull public static final String KEY_ROLES = "roles";
 
-        @SerializedName(KEY_ID) @Nullable public String id;
+        @SerializedName(KEY_ID) @Nullable public Long id;
         @SerializedName(KEY_USERNAME) @Nullable public String username;
         @SerializedName(KEY_ROLES) @Nullable public Set<EAPlayer.Discord.Role> roles;
 
         public Discord() {}
 
         public Discord(long id, @Nullable String username, @Nullable Set<EAPlayer.Discord.Role> roles) {
-            this.id = String.valueOf(id);
+            this.id = id;
             this.username = username;
             this.roles = roles;
         }
