@@ -1,6 +1,11 @@
 package gg.eventalerts.sdk.http.exception;
 
+import com.google.gson.JsonObject;
+import gg.eventalerts.sdk.json.GSONProvider;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
 
 
 public class EAHttpResponseException extends EAHttpException {
@@ -20,5 +25,23 @@ public class EAHttpResponseException extends EAHttpException {
     @Nullable
     public String getResponseBody() {
         return responseBody;
+    }
+
+    @NotNull
+    public Optional<String> getResponseBodyOptional() {
+        return Optional.ofNullable(responseBody);
+    }
+
+    @Nullable
+    public JsonObject getResponseBodyJson() {
+        if (responseBody != null) try {
+            return GSONProvider.GSON.fromJson(responseBody, JsonObject.class);
+        } catch (final Exception ignored) {}
+        return null;
+    }
+
+    @NotNull
+    public Optional<JsonObject> getResponseBodyJsonOptional() {
+        return Optional.ofNullable(getResponseBodyJson());
     }
 }

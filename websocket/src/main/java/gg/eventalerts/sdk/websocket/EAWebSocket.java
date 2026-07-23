@@ -239,6 +239,7 @@ public class EAWebSocket extends WebSocketClient {
         @Nullable private String bearerToken;
         @Nullable private String playerKey;
         @Nullable private String serverKey;
+        @Nullable private String eventUtilsKey;
         @NotNull private final Map<String, String> headers = new HashMap<>();
 
         public Builder(@NotNull String userAgent) {
@@ -288,6 +289,12 @@ public class EAWebSocket extends WebSocketClient {
         }
 
         @NotNull
+        public Builder eventUtilsKey(@Nullable String eventUtilsKey) {
+            this.eventUtilsKey = eventUtilsKey;
+            return this;
+        }
+
+        @NotNull
         public Builder header(@NotNull String key, @NotNull String value) {
             headers.put(key, value);
             return this;
@@ -298,8 +305,13 @@ public class EAWebSocket extends WebSocketClient {
             // URL: remove trailing slash
             if (url.endsWith("/")) url = url.substring(0, url.length() - 1);
 
+            // KEYS: Validate
+            if (playerKey != null) EventAlertsSDK.validateKey(playerKey, EventAlertsSDK.KEY_PREFIX_PLAYER);
+            if (serverKey != null) EventAlertsSDK.validateKey(serverKey, EventAlertsSDK.KEY_PREFIX_SERVER);
+            if (eventUtilsKey != null) EventAlertsSDK.validateKey(eventUtilsKey, EventAlertsSDK.KEY_PREFIX_EVENT_UTILS);
+
             // Build
-            return new EAWebSocket(url, EventAlertsSDK.createHeaders(headers, userAgent, bearerToken, playerKey, serverKey), handlers, retry, retryDelay);
+            return new EAWebSocket(url, EventAlertsSDK.createHeaders(headers, userAgent, bearerToken, playerKey, serverKey, eventUtilsKey), handlers, retry, retryDelay);
         }
 
         /**

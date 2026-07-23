@@ -1,6 +1,7 @@
 package gg.eventalerts.sdk.object;
 
 import com.google.gson.annotations.SerializedName;
+import gg.eventalerts.sdk.EventAlertsSDK;
 import gg.eventalerts.sdk.ExampleUtility;
 import org.bson.types.ObjectId;
 import org.jetbrains.annotations.NotNull;
@@ -99,7 +100,7 @@ public class EAPartnerServer extends EAObject {
                 null,
                 gets,
                 DisableData.getExample(),
-                "EA.Player." + ExampleUtility.Random.base64(32));
+                EventAlertsSDK.KEY_PREFIX_SERVER + "1." + ExampleUtility.Random.base64(32));
     }
 
     public enum Tag {

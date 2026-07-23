@@ -63,6 +63,7 @@ public class EAAction<T> {
 
     @NotNull @CheckReturnValue
     public CompletableFuture<T> submit() {
+        LOGGER.fine("Submitting action: " + description);
         try {
             return submitter.apply(null);
         } catch (final RuntimeException runtimeException) {

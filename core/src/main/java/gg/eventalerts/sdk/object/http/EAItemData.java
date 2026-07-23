@@ -8,6 +8,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 
+/**
+ * Do not deserialize from JSON!
+ */
 public class EAItemData<O extends EAObject> extends EAObject {
     /**
      * Only used for {@link EAItemDataAdapter}

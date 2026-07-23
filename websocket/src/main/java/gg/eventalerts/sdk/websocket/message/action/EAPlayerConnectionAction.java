@@ -34,7 +34,7 @@ public class EAPlayerConnectionAction extends EAObject {
     public static EAPlayerConnectionAction getExample() {
         return new EAPlayerConnectionAction(
                 ExampleUtility.Minecraft.SRNYX_UUID,
-                "srnyx",
+                ExampleUtility.Minecraft.SRNYX_USERNAME,
                 new Date(),
                 EAPlayerConnectionAction.Type.JOIN);
     }

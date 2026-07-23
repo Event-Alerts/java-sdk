@@ -24,51 +24,23 @@ import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.logging.Logger;
 
 
-public abstract class EAEndpoint<O extends EAObject> {
+public abstract class EAEndpoint {
+    @NotNull public static final Logger LOGGER = Logger.getLogger(EAEndpoint.class.getName());
+
     @NotNull private final EAHTTP http;
+    @NotNull private final String path;
 
-    public EAEndpoint(@NotNull EAHTTP http) {
+    public EAEndpoint(@NotNull EAHTTP http, @NotNull String @NotNull ... pathSegments) {
         this.http = http;
+        this.path = buildPath(pathSegments);
+        LOGGER.fine("Created EAEndpoint for path '" + path + "'");
     }
 
-    @NotNull
-    public abstract String getPath();
-
-    @NotNull
-    public String getPaginatedFieldName() {
-        return getPath();
-    }
-
-    @NotNull
-    public String getSingleFieldName() {
-        final String paginatedFieldName = getPaginatedFieldName();
-        return paginatedFieldName.endsWith("s") ? paginatedFieldName.substring(0, paginatedFieldName.length() - 1) : paginatedFieldName;
-    }
-
-    @NotNull
-    public abstract Class<O> getObjectType();
-
-    /**
-     * Retrieves the first page of results
-     */
-    @NotNull
-    public EAAction<PaginatedResponse<O>> retrievePage() {
-        return retrievePage(null);
-    }
-
-    /**
-     * Retrieves the first page of results.
-     * <br>You can specify page/limit in the query parameters.
-     *
-     * @param   queryParams optional query parameters
-     *
-     * @return  action yielding a {@link PaginatedResponse} with items and metadata
-     */
-    @NotNull
-    public EAAction<PaginatedResponse<O>> retrievePage(@Nullable Map<String, Object> queryParams) {
-        return retrievePage(null, null, queryParams);
+    public EAEndpoint(@NotNull EAEndpoint parent, @NotNull String @NotNull ... pathSegments) {
+        this(parent.http, parent.path + buildPath(pathSegments));
     }
 
     /**
@@ -81,46 +53,8 @@ public abstract class EAEndpoint<O extends EAObject> {
      * @return  action yielding a {@link PaginatedResponse}
      */
     @NotNull
-    public EAAction<PaginatedResponse<O>> retrievePage(@Nullable Integer page, @Nullable Integer limit, @Nullable Map<String, Object> queryParams) {
-        return new EAAction<>("GET " + getPath(), () -> executePage(queryParams, page, limit));
-    }
-
-    /**
-     * Auto-paginates to collect exactly {@code count} items (or fewer if the API has less)
-     *
-     * @param   count   total items to collect
-     *
-     * @return  action yielding the accumulated list
-     */
-    @NotNull
-    public EAAction<List<O>> retrieveMany(int count) {
-        return retrieveMany(count, null, null);
-    }
-
-    /**
-     * Auto-paginates to collect exactly {@code count} items (or fewer if the API has less)
-     *
-     * @param   count       total items to collect
-     * @param   startPage   optional page to start from (1-indexed)
-     *
-     * @return  action yielding the accumulated list
-     */
-    @NotNull
-    public EAAction<List<O>> retrieveMany(int count, @Nullable Integer startPage) {
-        return retrieveMany(count, startPage, null);
-    }
-
-    /**
-     * Auto-paginates to collect exactly {@code count} items (or fewer if the API has less)
-     *
-     * @param   count       total items to collect
-     * @param   queryParams optional query parameters (page/limit are ignored)
-     *
-     * @return  action yielding the accumulated list
-     */
-    @NotNull
-    public EAAction<List<O>> retrieveMany(int count, @Nullable Map<String, Object> queryParams) {
-        return retrieveMany(count, null, queryParams);
+    public <O extends EAObject> EAAction<PaginatedResponse<O>> retrievePage(@NotNull Class<O> objectType, @NotNull String fieldName, @Nullable Integer page, @Nullable Integer limit, @Nullable Map<String, Object> queryParams) {
+        return new EAAction<>("GET " + path, () -> executePage(objectType, fieldName, queryParams, page, limit));
     }
 
     /**
@@ -133,14 +67,14 @@ public abstract class EAEndpoint<O extends EAObject> {
      * @return  action yielding the accumulated list
      */
     @NotNull
-    public EAAction<List<O>> retrieveMany(int count, @Nullable Integer startPage, @Nullable Map<String, Object> queryParams) {
-        return new EAAction<>("GET " + getPath(), () -> {
+    public <O extends EAObject> EAAction<List<O>> retrieveMany(@NotNull Class<O> objectType, @NotNull String fieldName, int count, @Nullable Integer startPage, @Nullable Map<String, Object> queryParams) {
+        return new EAAction<>("GET " + path, () -> {
             final List<O> result = new ArrayList<>();
             int page = (startPage != null && startPage > 0) ? startPage : 1;
             int remaining = count;
             while (remaining > 0) {
                 final int limit = Math.min(remaining, 50);
-                final PaginatedResponse<O> response = executePage(queryParams, page, limit);
+                final PaginatedResponse<O> response = executePage(objectType, fieldName, queryParams, page, limit);
                 result.addAll(response.items);
                 remaining -= response.count;
                 if (response.count < limit || result.size() >= response.total) break;
@@ -151,18 +85,6 @@ public abstract class EAEndpoint<O extends EAObject> {
     }
 
     /**
-     * Retrieves a single object with a path and returns it wrapped in a {@link EAItemData}
-     *
-     * @param   pathSegments    the path segments to append to the endpoint path
-     *
-     * @return  action yielding the retrieved object wrapped in an {@link EAItemData}
-     */
-    @NotNull
-    public EAAction<EAItemData<O>> retrieveOneData(@NotNull String... pathSegments) {
-        return new EAAction<>("GET " + getPath(), () -> executeOne(pathSegments));
-    }
-
-    /**
      * Retrieves a single object with a path
      *
      * @param   pathSegments    the path segments to append to the endpoint path
@@ -170,12 +92,50 @@ public abstract class EAEndpoint<O extends EAObject> {
      * @return  action yielding the retrieved object
      */
     @NotNull
-    public EAAction<O> retrieveOne(@NotNull String... pathSegments) {
-        return retrieveOneData(pathSegments).map(data -> data.item);
+    public <O extends EAObject> EAAction<O> retrieveOne(@NotNull Class<O> objectType, @NotNull String fieldName, @NotNull String @NotNull ... pathSegments) {
+        return new EAAction<>("GET " + path, () -> executeOne(objectType, fieldName, pathSegments)).map(data -> data.item);
+    }
+
+    /**
+     * Posts to the endpoint with a path and returns the response object
+     *
+     * @param   pathSegments    the path segments to append to the endpoint path
+     *
+     * @return  action yielding the response object
+     */
+    @NotNull
+    public <O extends EAObject> EAAction<O> postOne(@NotNull Class<O> objectType, @NotNull String fieldName, @NotNull String body, @NotNull String @NotNull ... pathSegments) {
+        final String url = buildUrl(null, pathSegments);
+        return new EAAction<>("POST " + url, () -> {
+            HttpURLConnection connection = null;
+            try {
+                // Open connection and get details
+                final ConnectionDetails details = openConnectionPOST(url, fieldName, body);
+                connection = details.connection;
+
+                // Parse object
+                O item = null;
+                if (details.raw != null) item = GSONProvider.GSON.fromJson(details.raw, objectType);
+
+                // Build and return EAItemData
+                return new EAItemData<>(fieldName, item);
+            } catch (final RuntimeException e) {
+                throw e;
+            } catch (final Exception e) {
+                throw new EAHttpRequestException("POST " + url, e);
+            } finally {
+                if (connection != null) connection.disconnect();
+            }
+        }).map(data -> data.item);
     }
 
     @NotNull
-    public String buildUrl(@NotNull String endpointPath, @Nullable Map<String, Object> queryParams, @Nullable String... pathSegments) {
+    public <O extends EAObject> EAAction<O> postOne(@NotNull Class<O> objectType, @NotNull String fieldName, @NotNull EAObject body, @NotNull String @NotNull ... pathSegments) {
+        return postOne(objectType, fieldName, GSONProvider.GSON.toJson(body), pathSegments);
+    }
+
+    @NotNull
+    public String buildUrl(@Nullable Map<String, Object> queryParams, @NotNull String @Nullable ... pathSegments) {
         // Build query parameters
         final StringBuilder queryString = new StringBuilder();
         if (queryParams != null && !queryParams.isEmpty()) {
@@ -212,28 +172,19 @@ public abstract class EAEndpoint<O extends EAObject> {
             }
         }
 
-        // Build path
-        final StringBuilder path = new StringBuilder();
-        if (pathSegments != null) for (final String segment : pathSegments) path.append("/").append(segment);
-
         // Build and return full URL
-        return http.url + endpointPath + path + queryString;
+        return http.url + path + buildPath(pathSegments) + queryString;
     }
 
     @NotNull
-    protected ConnectionDetails openConnection(@NotNull String url, @NotNull String objectField) throws IOException {
-        // Open connection
-        final HttpURLConnection connection = (HttpURLConnection) URI.create(url).toURL().openConnection();
-        connection.setRequestMethod("GET");
-        for (final Map.Entry<String, String> header : http.headers.entrySet()) connection.setRequestProperty(header.getKey(), header.getValue());
-
+    protected ConnectionDetails openConnection(@NotNull HttpURLConnection connection, @NotNull String objectField) throws IOException {
         // Get response
         final int statusCode = connection.getResponseCode();
         final String body = readBody(statusCode >= 400 ? connection.getErrorStream() : connection.getInputStream());
         final JsonObject json = GSONProvider.GSON.fromJson(body, JsonObject.class);
         if (json == null) {
             if (statusCode >= 400) throw new EAHttpResponseException(statusCode, connection.getResponseMessage(), body);
-            throw new EAHttpRequestException("GET " + url, new IllegalStateException("Failed to parse JSON response"));
+            throw new EAHttpRequestException("GET " + connection.getURL(), new IllegalStateException("Failed to parse JSON response"));
         }
 
         // Error
@@ -270,6 +221,25 @@ public abstract class EAEndpoint<O extends EAObject> {
         return new ConnectionDetails(connection, raw, page, limit, count, total, all);
     }
 
+    @NotNull
+    protected ConnectionDetails openConnectionGET(@NotNull String url, @NotNull String objectField) throws IOException {
+        LOGGER.fine("Opening GET connection to " + url + " for object field '" + objectField + "'");
+        final HttpURLConnection connection = (HttpURLConnection) URI.create(url).toURL().openConnection();
+        connection.setRequestMethod("GET");
+        for (final Map.Entry<String, String> header : http.headers.entrySet()) connection.setRequestProperty(header.getKey(), header.getValue());
+        return openConnection(connection, objectField);
+    }
+
+    @NotNull
+    protected ConnectionDetails openConnectionPOST(@NotNull String url, @NotNull String objectField, @NotNull String body) throws IOException {
+        final HttpURLConnection connection = (HttpURLConnection) URI.create(url).toURL().openConnection();
+        connection.setRequestMethod("POST");
+        connection.setDoOutput(true);
+        for (final Map.Entry<String, String> header : http.headers.entrySet()) connection.setRequestProperty(header.getKey(), header.getValue());
+        connection.getOutputStream().write(body.getBytes(StandardCharsets.UTF_8));
+        return openConnection(connection, objectField);
+    }
+
     protected static class ConnectionDetails {
         @NotNull private final HttpURLConnection connection;
         @Nullable private final JsonElement raw;
@@ -291,31 +261,29 @@ public abstract class EAEndpoint<O extends EAObject> {
     }
 
     @NotNull
-    private PaginatedResponse<O> executePage(@Nullable Map<String, Object> queryParams, @Nullable Integer page, @Nullable Integer limit) {
+    private <O extends EAObject> PaginatedResponse<O> executePage(@NotNull Class<O> objectType, @NotNull String fieldName, @Nullable Map<String, Object> queryParams, @Nullable Integer page, @Nullable Integer limit) {
         final Map<String, Object> params = new HashMap<>();
         if (queryParams != null) params.putAll(queryParams);
         if (page != null) params.put("page", page);
         if (limit != null) params.put("limit", limit);
-
-        final String url = buildUrl(getPath(), params);
-        final String objectField = getPaginatedFieldName();
+        final String url = buildUrl(params);
 
         HttpURLConnection connection = null;
         try {
             // Open connection and get details
-            final ConnectionDetails details = openConnection(url, objectField);
+            final ConnectionDetails details = openConnectionGET(url, fieldName);
             connection = details.connection;
 
             // Parse objects
             List<O> items = Collections.emptyList();
             if (details.raw != null) {
-                final List<O> fromJson = GSONProvider.GSON.fromJson(details.raw, TypeToken.getParameterized(List.class, getObjectType()).getType());
+                final List<O> fromJson = GSONProvider.GSON.fromJson(details.raw, TypeToken.getParameterized(List.class, objectType).getType());
                 if (fromJson != null) items = fromJson;
             }
 
             // Build and return PaginatedResponse
-            return new PaginatedResponse<>(objectField, items, details.page, details.limit, details.count, details.total, details.all,
-                (fetcherPage, fetcherLimit) -> retrievePage(fetcherPage, fetcherLimit, queryParams));
+            return new PaginatedResponse<>(fieldName, items, details.page, details.limit, details.count, details.total, details.all,
+                (fetcherPage, fetcherLimit) -> retrievePage(objectType, fieldName, fetcherPage, fetcherLimit, queryParams));
         } catch (final RuntimeException e) {
             throw e;
         } catch (final Exception e) {
@@ -326,22 +294,21 @@ public abstract class EAEndpoint<O extends EAObject> {
     }
 
     @NotNull
-    private EAItemData<O> executeOne(@Nullable String... pathSegments) {
-        final String url = buildUrl(getPath(), null, pathSegments);
-        final String objectField = getSingleFieldName();
+    private <O extends EAObject> EAItemData<O> executeOne(@NotNull Class<O> objectType, @NotNull String fieldName, @NotNull String @Nullable ... pathSegments) {
+        final String url = buildUrl(null, pathSegments);
 
         HttpURLConnection connection = null;
         try {
             // Open connection and get details
-            final ConnectionDetails details = openConnection(url, objectField);
+            final ConnectionDetails details = openConnectionGET(url, fieldName);
             connection = details.connection;
 
             // Parse object
             O item = null;
-            if (details.raw != null) item = GSONProvider.GSON.fromJson(details.raw, getObjectType());
+            if (details.raw != null) item = GSONProvider.GSON.fromJson(details.raw, objectType);
 
             // Build and return EAItemData
-            return new EAItemData<>(objectField, item);
+            return new EAItemData<>(fieldName, item);
         } catch (final RuntimeException e) {
             throw e;
         } catch (final Exception e) {
@@ -376,5 +343,15 @@ public abstract class EAEndpoint<O extends EAObject> {
         } catch (final Exception e) {
             return value;
         }
+    }
+
+    @NotNull
+    private static String buildPath(@NotNull String @Nullable ... pathSegments) {
+        final StringBuilder path = new StringBuilder();
+        if (pathSegments != null) for (final String segment : pathSegments) {
+            if (!segment.startsWith("/")) path.append("/");
+            path.append(segment);
+        }
+        return path.toString();
     }
 }

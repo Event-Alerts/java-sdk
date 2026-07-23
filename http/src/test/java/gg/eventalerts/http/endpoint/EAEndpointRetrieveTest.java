@@ -3,7 +3,9 @@ package gg.eventalerts.http.endpoint;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import gg.eventalerts.sdk.EventAlertsSDK;
 import gg.eventalerts.sdk.http.EAHTTP;
+import gg.eventalerts.sdk.http.endpoint.EAEndpoint;
 import gg.eventalerts.sdk.http.response.PaginatedResponse;
 import gg.eventalerts.sdk.http.exception.EAHttpRequestException;
 import gg.eventalerts.sdk.http.endpoint.EAEvents;
@@ -26,11 +28,16 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 
 class EAEndpointRetrieveTest {
+    @NotNull private static final Level LOG_LEVEL = Level.FINE;
+
     private static final int PORT = 0;
     private static final AtomicReference<String> lastPath = new AtomicReference<>();
     private static final AtomicReference<String> lastQuery = new AtomicReference<>();
@@ -40,6 +47,10 @@ class EAEndpointRetrieveTest {
 
     @BeforeAll
     static void startServer() throws IOException {
+        final Logger root = Logger.getLogger("");
+        root.setLevel(LOG_LEVEL);
+        for (final Handler handler : root.getHandlers()) handler.setLevel(LOG_LEVEL);
+
         server = HttpServer.create(new InetSocketAddress("localhost", PORT), 0);
         server.createContext("/", new TestHandler());
         server.start();
@@ -68,7 +79,7 @@ class EAEndpointRetrieveTest {
         final Map<String, Object> query = new LinkedHashMap<>();
         query.put("search term", "alpha & beta");
 
-        final PaginatedResponse<EAEvent> result = http.events.retrievePage(query).complete();
+        final PaginatedResponse<EAEvent> result = http.events.retrievePage(null, null, query).complete();
 
         assertEquals(1, result.items.size());
         assertEquals(new ObjectId("507f1f77bcf86cd799439011"), result.items.get(0).id);
@@ -82,22 +93,8 @@ class EAEndpointRetrieveTest {
         assertEquals("application/json", lastHeaders.get().getFirst("Accept"));
         assertEquals("EventAlertsSDK/1.0", lastHeaders.get().getFirst("User-Agent"));
         assertEquals("Bearer bearer-token", lastHeaders.get().getFirst("Authorization"));
-        assertNull(lastHeaders.get().getFirst("X-Player-Key"));
-        assertNull(lastHeaders.get().getFirst("X-Server-Key"));
-    }
-
-    @Test
-    void retrieveOneDataCompletesWithSingleObject() {
-        final EAHTTP http = new EAHTTP.Builder("EventAlertsSDK/1.0").url(baseUrl).build();
-
-        final EAEvent event = http.events.retrieveOneDataById(new ObjectId("507f1f77bcf86cd799439011")).complete().item;
-
-        assertNotNull(event);
-        assertEquals(new ObjectId("507f1f77bcf86cd799439011"), event.id);
-        assertEquals("Example Event", event.title);
-
-        assertEquals("/api/v1/events/id/507f1f77bcf86cd799439011", lastPath.get());
-        assertNull(lastQuery.get());
+        assertNull(lastHeaders.get().getFirst(EventAlertsSDK.HEADER_PLAYER_KEY));
+        assertNull(lastHeaders.get().getFirst(EventAlertsSDK.HEADER_SERVER_KEY));
     }
 
     @Test
@@ -105,7 +102,7 @@ class EAEndpointRetrieveTest {
         final EAHTTP http = new EAHTTP.Builder("EventAlertsSDK/1.0").url(baseUrl).build();
         final EAEvents events = new EAEvents(http) {
             @Override @NotNull
-            protected ConnectionDetails openConnection(@NotNull String url, @NotNull String objectField) throws IOException {
+            protected ConnectionDetails openConnectionGET(@NotNull String url, @NotNull String objectField) throws IOException {
                 throw new IOException("boom");
             }
         };
@@ -124,7 +121,7 @@ class EAEndpointRetrieveTest {
         assertNotNull(event);
         assertEquals("Recovered Event", event.title);
         assertInstanceOf(EAHttpRequestException.class, captured.get());
-        assertTrue(captured.get().getMessage().contains("GET " + events.buildUrl(events.getPath(), null, "broken")));
+        assertTrue(captured.get().getMessage().contains("GET " + events.buildUrl(null, "broken")));
     }
 
     @Test
@@ -133,7 +130,7 @@ class EAEndpointRetrieveTest {
 
         final CountDownLatch latch = new CountDownLatch(1);
         final AtomicReference<PaginatedResponse<EAEvent>> callbackResult = new AtomicReference<>();
-        http.events.retrievePage().queue(result -> {
+        http.events.retrievePage(null, null, null).queue(result -> {
             callbackResult.set(result);
             latch.countDown();
         }, throwable -> {
@@ -150,12 +147,12 @@ class EAEndpointRetrieveTest {
         final EAHTTP http = new EAHTTP.Builder("EventAlertsSDK/1.0").url(baseUrl).build();
         final EAEvents events = new EAEvents(http) {
             @Override @NotNull
-            protected ConnectionDetails openConnection(@NotNull String url, @NotNull String objectField) {
+            protected ConnectionDetails openConnectionGET(@NotNull String url, @NotNull String objectField) {
                 throw new AssertionError("fatal");
             }
         };
 
-        assertThrows(AssertionError.class, () -> events.retrievePage(Collections.emptyMap()).complete());
+        assertThrows(AssertionError.class, () -> events.retrievePage(null, null, Collections.emptyMap()).complete());
     }
 
     private static class TestHandler implements HttpHandler {

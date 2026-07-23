@@ -30,15 +30,59 @@ public class EAHTTP {
         this.headers = headers;
     }
 
+    @NotNull
+    public EAHTTP setBearerToken(@Nullable String bearerToken) {
+        if (bearerToken != null) {
+            headers.put("Authorization", "Bearer " + bearerToken);
+        } else {
+            headers.remove("Authorization");
+        }
+        return this;
+    }
+
+    @NotNull
+    public EAHTTP setPlayerKey(@Nullable String playerKey) {
+        if (playerKey != null) {
+            EventAlertsSDK.validateKey(playerKey, EventAlertsSDK.KEY_PREFIX_PLAYER);
+            headers.put(EventAlertsSDK.HEADER_PLAYER_KEY, playerKey);
+        } else {
+            headers.remove(EventAlertsSDK.HEADER_PLAYER_KEY);
+        }
+        return this;
+    }
+
+    @NotNull
+    public EAHTTP setServerKey(@Nullable String serverKey) {
+        if (serverKey != null) {
+            EventAlertsSDK.validateKey(serverKey, EventAlertsSDK.KEY_PREFIX_SERVER);
+            headers.put(EventAlertsSDK.HEADER_SERVER_KEY, serverKey);
+        } else {
+            headers.remove(EventAlertsSDK.HEADER_SERVER_KEY);
+        }
+        return this;
+    }
+
+    @NotNull
+    public EAHTTP setEventUtilsKey(@Nullable String eventUtilsKey) {
+        if (eventUtilsKey != null) {
+            EventAlertsSDK.validateKey(eventUtilsKey, EventAlertsSDK.KEY_PREFIX_EVENT_UTILS);
+            headers.put(EventAlertsSDK.HEADER_EVENT_UTILS_KEY, eventUtilsKey);
+        } else {
+            headers.remove(EventAlertsSDK.HEADER_EVENT_UTILS_KEY);
+        }
+        return this;
+    }
+
     public static class Builder {
         // Required
         @NotNull private final String userAgent;
 
         // Optional
-        @NotNull private String url = "https://eventalerts.gg/api/v1/";
+        @NotNull private String url = "https://eventalerts.gg/api/v1";
         @Nullable private String bearerToken;
         @Nullable private String playerKey;
         @Nullable private String serverKey;
+        @Nullable private String eventUtilsKey;
         @NotNull private final Map<String, String> headers = new HashMap<>();
 
         public Builder(@NotNull String userAgent) {
@@ -71,6 +115,12 @@ public class EAHTTP {
         }
 
         @NotNull
+        public Builder eventUtilsKey(@Nullable String eventUtilsKey) {
+            this.eventUtilsKey = eventUtilsKey;
+            return this;
+        }
+
+        @NotNull
         public Builder header(@NotNull String key, @NotNull String value) {
             headers.put(key, value);
             return this;
@@ -78,11 +128,16 @@ public class EAHTTP {
 
         @NotNull
         public EAHTTP build() {
-            // URL: add trailing slash
-            if (!url.endsWith("/")) url += "/";
+            // URL: remove trailing slash
+            if (url.endsWith("/")) url = url.substring(0, url.length() - 1);
+
+            // KEYS: Validate
+            if (playerKey != null) EventAlertsSDK.validateKey(playerKey, EventAlertsSDK.KEY_PREFIX_PLAYER);
+            if (serverKey != null) EventAlertsSDK.validateKey(serverKey, EventAlertsSDK.KEY_PREFIX_SERVER);
+            if (eventUtilsKey != null) EventAlertsSDK.validateKey(eventUtilsKey, EventAlertsSDK.KEY_PREFIX_EVENT_UTILS);
 
             // Build
-            return new EAHTTP(url, userAgent, EventAlertsSDK.createHeaders(headers, userAgent, bearerToken, playerKey, serverKey));
+            return new EAHTTP(url, userAgent, EventAlertsSDK.createHeaders(headers, userAgent, bearerToken, playerKey, serverKey, eventUtilsKey));
         }
     }
 }

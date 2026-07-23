@@ -1,5 +1,6 @@
 package gg.eventalerts.websocket;
 
+import gg.eventalerts.sdk.EventAlertsSDK;
 import gg.eventalerts.sdk.object.EAEvent;
 import gg.eventalerts.sdk.object.EAEventThreadMessage;
 import gg.eventalerts.sdk.websocket.EAWebSocket;
@@ -93,8 +94,9 @@ class EAWebSocketIntegrationTest {
                 .url(SOCKET_URL)
                 .retry(false)
                 .bearerToken("bearer-123")
-                .playerKey("player-456")
-                .serverKey("server-789")
+                .playerKey(EventAlertsSDK.KEY_PREFIX_PLAYER + "1.abc")
+                .serverKey(EventAlertsSDK.KEY_PREFIX_SERVER + "1.def")
+                .eventUtilsKey(EventAlertsSDK.KEY_PREFIX_EVENT_UTILS + "1.ghi")
                 .handler(enabledHandler, disabledHandler)
                 .build();
 
@@ -106,8 +108,9 @@ class EAWebSocketIntegrationTest {
         assertEquals("/api/v1/socket", handshake.getResourceDescriptor());
         assertEquals("gg.eventalerts.sdk-test/1.0", handshake.getFieldValue("User-Agent"));
         assertEquals("Bearer bearer-123", handshake.getFieldValue("Authorization"));
-        assertEquals("player-456", handshake.getFieldValue("X-Player-Key"));
-        assertEquals("server-789", handshake.getFieldValue("X-Server-Key"));
+        assertEquals(EventAlertsSDK.KEY_PREFIX_PLAYER + "1.abc", handshake.getFieldValue(EventAlertsSDK.HEADER_PLAYER_KEY));
+        assertEquals(EventAlertsSDK.KEY_PREFIX_SERVER + "1.def", handshake.getFieldValue(EventAlertsSDK.HEADER_SERVER_KEY));
+        assertEquals(EventAlertsSDK.KEY_PREFIX_EVENT_UTILS + "1.ghi", handshake.getFieldValue(EventAlertsSDK.HEADER_EVENT_UTILS_KEY));
         assertNull(server.failure());
 
         final EAUpdateSubscriptionAction subscription = server.parseAction(0).data;

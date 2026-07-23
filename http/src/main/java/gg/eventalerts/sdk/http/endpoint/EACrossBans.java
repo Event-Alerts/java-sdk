@@ -2,45 +2,43 @@ package gg.eventalerts.sdk.http.endpoint;
 
 import gg.eventalerts.sdk.http.EAHTTP;
 import gg.eventalerts.sdk.http.action.EAAction;
+import gg.eventalerts.sdk.http.response.PaginatedResponse;
 import gg.eventalerts.sdk.object.EACrossBan;
-import gg.eventalerts.sdk.object.http.EAItemData;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 
-public class EACrossBans extends EAEndpoint<EACrossBan> {
+public class EACrossBans extends EAEndpoint {
     public EACrossBans(@NotNull EAHTTP http) {
-        super(http);
-    }
-
-    @Override @NotNull
-    public String getPath() {
-        return "cross_bans";
-    }
-
-    @Override @NotNull
-    public Class<EACrossBan> getObjectType() {
-        return EACrossBan.class;
+        super(http, "cross_bans");
     }
 
     @NotNull
-    public EAAction<EAItemData<EACrossBan>> retrieveOneDataByDiscordId(long discordId) {
-        return retrieveOneData("discord_id", String.valueOf(discordId));
+    public EAAction<PaginatedResponse<EACrossBan>> retrievePage(@Nullable Integer page, @Nullable Integer limit, @Nullable Map<String, Object> queryParams) {
+        return super.retrievePage(EACrossBan.class, "cross_bans", page, limit, queryParams);
+    }
+
+    @NotNull
+    public EAAction<List<EACrossBan>> retrieveMany(int count, @Nullable Integer startPage, @Nullable Map<String, Object> queryParams) {
+        return super.retrieveMany(EACrossBan.class, "cross_bans", count, startPage, queryParams);
+    }
+
+    @NotNull
+    public EAAction<EACrossBan> retrieveOne(@NotNull String... pathSegments) {
+        return super.retrieveOne(EACrossBan.class, "cross_ban", pathSegments);
     }
 
     @NotNull
     public EAAction<EACrossBan> retrieveOneByDiscordId(long discordId) {
-        return retrieveOneDataByDiscordId(discordId).map(data -> data.item);
-    }
-
-    @NotNull
-    public EAAction<EAItemData<EACrossBan>> retrieveOneDataByMinecraftUuid(@NotNull UUID minecraftUuid) {
-        return retrieveOneData("minecraft_uuid", minecraftUuid.toString());
+        return retrieveOne("discord_id", String.valueOf(discordId));
     }
 
     @NotNull
     public EAAction<EACrossBan> retrieveOneByMinecraftUuid(@NotNull UUID minecraftUuid) {
-        return retrieveOneDataByMinecraftUuid(minecraftUuid).map(data -> data.item);
+        return retrieveOne("minecraft_uuid", minecraftUuid.toString());
     }
 }

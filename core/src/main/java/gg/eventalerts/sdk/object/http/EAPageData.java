@@ -10,6 +10,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 
+/**
+ * Do not deserialize from JSON!
+ */
 public class EAPageData<O extends EAObject> extends EAObject {
     /**
      * Only used for {@link EAPageDataAdapter}

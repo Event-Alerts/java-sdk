@@ -22,11 +22,14 @@ public class ExampleUtility {
         public static final long OIIINK_ID = 365630764244664320L;
         public static final long RAME_ID = 381890968971902976L;
         public static final long REECE_ID = 533985117589471233L;
+
+        public static final String SRNYX_USERNAME = "srnyx";
     }
 
     public static class Minecraft {
         public static final UUID SRNYX_UUID = UUID.fromString("e907083e-5db6-41fc-9e32-5c4d99a08712");
-        public static final UUID OIIINK_UUID = UUID.fromString("68c26c5d-6c9c-44cd-b75c-cda989b083ab");
+
+        public static final String SRNYX_USERNAME = "srnyx";
     }
 
     public static class Random {

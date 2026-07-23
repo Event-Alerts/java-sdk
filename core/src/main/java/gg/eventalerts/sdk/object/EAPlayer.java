@@ -110,7 +110,7 @@ public class EAPlayer extends EAObject {
         public static Discord getExample() {
             return new Discord(
                     ExampleUtility.User.SRNYX_ID,
-                    "srnyx",
+                    ExampleUtility.User.SRNYX_USERNAME,
                     new HashSet<>(Arrays.asList(EAPlayer.Discord.Role.ADMIN, EAPlayer.Discord.Role.STAFF)));
         }
 
@@ -125,22 +125,64 @@ public class EAPlayer extends EAObject {
     public static class Minecraft extends EAObject {
         @NotNull public static final String KEY_UUID = "uuid";
         @NotNull public static final String KEY_USERNAME = "username";
+        @NotNull public static final String KEY_EVENT_UTILS = "eventUtils";
 
         @SerializedName(KEY_UUID) @Nullable public UUID uuid;
         @SerializedName(KEY_USERNAME) @Nullable public String username;
+        @SerializedName(KEY_EVENT_UTILS) @Nullable public EventUtils eventUtils;
 
         public Minecraft() {}
 
-        public Minecraft(@NotNull UUID uuid, @Nullable String username) {
+        public Minecraft(@NotNull UUID uuid, @Nullable String username, @Nullable EventUtils eventUtils) {
             this.uuid = uuid;
             this.username = username;
+            this.eventUtils = eventUtils;
         }
 
         @NotNull
         public static Minecraft getExample() {
             return new Minecraft(
                     ExampleUtility.Minecraft.SRNYX_UUID,
-                    "srnyx");
+                    ExampleUtility.Minecraft.SRNYX_USERNAME,
+                    EventUtils.getExample());
+        }
+
+        public static class EventUtils extends EAObject {
+            @NotNull public static final String KEY_TOKEN_HASH = "tokenHash";
+            @NotNull public static final String KEY_CREATED = "created";
+            @NotNull public static final String KEY_EXPIRES = "expires";
+            @NotNull public static final String KEY_LAST_HEARTBEAT = "lastHeartbeat";
+            @NotNull public static final String KEY_MOD_VERSION = "modVersion";
+            @NotNull public static final String KEY_MINECRAFT_VERSION = "minecraftVersion";
+
+            @SerializedName(KEY_TOKEN_HASH) @Nullable public String tokenHash;
+            @SerializedName(KEY_CREATED) @Nullable public Date created;
+            @SerializedName(KEY_EXPIRES) @Nullable public Date expires;
+            @SerializedName(KEY_LAST_HEARTBEAT) @Nullable public Date lastHeartbeat;
+            @SerializedName(KEY_MOD_VERSION) @Nullable public String modVersion;
+            @SerializedName(KEY_MINECRAFT_VERSION) @Nullable public String minecraftVersion;
+
+            public EventUtils() {}
+
+            public EventUtils(@Nullable String tokenHash, @Nullable Date created, @Nullable Date expires, @Nullable Date lastHeartbeat, @Nullable String modVersion, @Nullable String minecraftVersion) {
+                this.tokenHash = tokenHash;
+                this.created = created;
+                this.expires = expires;
+                this.lastHeartbeat = lastHeartbeat;
+                this.modVersion = modVersion;
+                this.minecraftVersion = minecraftVersion;
+            }
+
+            @NotNull
+            public static EventUtils getExample() {
+                return new EventUtils(
+                        "exampleToken",
+                        new Date(),
+                        new Date(),
+                        new Date(),
+                        "3.0.0",
+                        "1.21.11");
+            }
         }
     }
 
