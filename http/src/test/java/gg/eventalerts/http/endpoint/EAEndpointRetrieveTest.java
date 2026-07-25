@@ -5,7 +5,6 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import gg.eventalerts.sdk.EventAlertsSDK;
 import gg.eventalerts.sdk.http.EAHTTP;
-import gg.eventalerts.sdk.http.endpoint.EAEndpoint;
 import gg.eventalerts.sdk.http.response.PaginatedResponse;
 import gg.eventalerts.sdk.http.exception.EAHttpRequestException;
 import gg.eventalerts.sdk.http.endpoint.EAEvents;

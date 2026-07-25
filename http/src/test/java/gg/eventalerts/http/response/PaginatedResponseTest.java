@@ -27,7 +27,7 @@ class PaginatedResponseTest {
 
     @Test
     void emptyRetrieveMoreReturnsEmptyList() throws Exception {
-        final List<EAObject> result = PaginatedResponse.<EAObject>empty().retrieveMore(10).submit().get(5, TimeUnit.SECONDS);
+        final List<EAObject> result = PaginatedResponse.empty().retrieveMore(10).submit().get(5, TimeUnit.SECONDS);
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }

@@ -95,7 +95,7 @@ public class EAPlayer extends EAObject {
 
         public Discord() {}
 
-        public Discord(long id, @Nullable String username, @Nullable Set<EAPlayer.Discord.Role> roles) {
+        public Discord(@Nullable Long id, @Nullable String username, @Nullable Set<EAPlayer.Discord.Role> roles) {
             this.id = id;
             this.username = username;
             this.roles = roles;
@@ -133,7 +133,7 @@ public class EAPlayer extends EAObject {
 
         public Minecraft() {}
 
-        public Minecraft(@NotNull UUID uuid, @Nullable String username, @Nullable EventUtils eventUtils) {
+        public Minecraft(@Nullable UUID uuid, @Nullable String username, @Nullable EventUtils eventUtils) {
             this.uuid = uuid;
             this.username = username;
             this.eventUtils = eventUtils;
