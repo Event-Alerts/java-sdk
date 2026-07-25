@@ -220,6 +220,39 @@ public class EAAction<T> {
     }
 
     /**
+     * Registers a completion tap that runs regardless of success or failure.
+     *
+     * @param   callback    the completion callback
+     *
+     * @return  a new action with the completion tap applied
+     */
+    @NotNull @CheckReturnValue
+    public EAAction<T> onComplete(@NotNull Runnable callback) {
+        return new EAAction<>(description + " -> onComplete", ignored -> {
+            final CompletableFuture<T> future = new CompletableFuture<>();
+            submit().whenComplete((value, throwable) -> {
+                try {
+                    callback.run();
+                } catch (final Throwable error) {
+                    if (throwable == null) {
+                        future.completeExceptionally(error);
+                        return;
+                    }
+                    future.completeExceptionally(appendCause(error, throwable));
+                    return;
+                }
+
+                if (throwable == null) {
+                    future.complete(value);
+                } else {
+                    future.completeExceptionally(unwrap(throwable));
+                }
+            });
+            return future;
+        });
+    }
+
+    /**
      * Registers a success tap that observes the completed value without changing it.
      *
      * @param callback the success callback
