@@ -12,19 +12,16 @@ import java.util.Set;
 public class EUOnlineAuthResponse extends EUOnlineUpdateResponse {
     @NotNull public static final String KEY_TOKEN = "token";
     @NotNull public static final String KEY_TOKEN_EXPIRES_AT = "tokenExpiresAt";
-    @NotNull public static final String KEY_PLAYER = "player";
 
     @SerializedName(KEY_TOKEN) @Nullable public String token;
     @SerializedName(KEY_TOKEN_EXPIRES_AT) @Nullable public Date tokenExpiresAt;
-    @SerializedName(KEY_PLAYER) @Nullable public EAPlayer player;
 
     public EUOnlineAuthResponse() {}
 
-    public EUOnlineAuthResponse(@NotNull Date heartbeatExpiresAt, @NotNull Set<EAPlayer> onlinePlayers, @NotNull String token, @NotNull Date tokenExpiresAt, @NotNull EAPlayer player) {
-        super(heartbeatExpiresAt, onlinePlayers);
+    public EUOnlineAuthResponse(@NotNull Date heartbeatExpiresAt, @NotNull EAPlayer player, @NotNull Set<EAPlayer> onlinePlayers, @NotNull String token, @NotNull Date tokenExpiresAt) {
+        super(heartbeatExpiresAt, player, onlinePlayers);
         this.token = token;
         this.tokenExpiresAt = tokenExpiresAt;
-        this.player = player;
     }
 
     @NotNull
@@ -35,9 +32,9 @@ public class EUOnlineAuthResponse extends EUOnlineUpdateResponse {
         }
         return new EUOnlineAuthResponse(
                 updateResponse.heartbeatExpiresAt,
+                EAPlayer.getExample(),
                 updateResponse.onlinePlayers,
                 "exampleToken",
-                new Date(),
-                EAPlayer.getExample());
+                new Date());
     }
 }

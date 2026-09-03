@@ -13,15 +13,18 @@ import java.util.Set;
 
 public class EUOnlineUpdateResponse extends EAObject {
     @NotNull public static final String KEY_HEARTBEAT_EXPIRES_AT = "heartbeatExpiresAt";
+    @NotNull public static final String KEY_PLAYER = "player";
     @NotNull public static final String KEY_ONLINE_PLAYERS = "onlinePlayers";
 
     @SerializedName(KEY_HEARTBEAT_EXPIRES_AT) @Nullable public Date heartbeatExpiresAt;
+    @SerializedName(KEY_PLAYER) @Nullable public EAPlayer player;
     @SerializedName(KEY_ONLINE_PLAYERS) @Nullable public Set<EAPlayer> onlinePlayers;
 
     public EUOnlineUpdateResponse() {}
 
-    public EUOnlineUpdateResponse(@Nullable Date heartbeatExpiresAt, @Nullable Set<EAPlayer> onlinePlayers) {
+    public EUOnlineUpdateResponse(@Nullable Date heartbeatExpiresAt, @Nullable EAPlayer player, @Nullable Set<EAPlayer> onlinePlayers) {
         this.heartbeatExpiresAt = heartbeatExpiresAt;
+        this.player = player;
         this.onlinePlayers = onlinePlayers;
     }
 
@@ -29,6 +32,7 @@ public class EUOnlineUpdateResponse extends EAObject {
     public static EUOnlineUpdateResponse getExample() {
         return new EUOnlineUpdateResponse(
                 new Date(),
+                EAPlayer.getExample(),
                 Collections.singleton(EAPlayer.getExample()));
     }
 }
