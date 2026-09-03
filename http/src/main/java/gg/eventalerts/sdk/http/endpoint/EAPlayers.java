@@ -2,8 +2,10 @@ package gg.eventalerts.sdk.http.endpoint;
 
 import gg.eventalerts.sdk.http.EAHTTP;
 import gg.eventalerts.sdk.http.action.EAAction;
+import gg.eventalerts.sdk.http.object.body.EUDiscordLinkBody;
 import gg.eventalerts.sdk.http.object.body.EUOnlineAuthBody;
 import gg.eventalerts.sdk.http.object.body.EUOnlineAuthUpdateBody;
+import gg.eventalerts.sdk.http.object.response.EUDiscordLinkResponse;
 import gg.eventalerts.sdk.http.object.response.EUOnlineAuthResponse;
 import gg.eventalerts.sdk.http.object.response.EUOnlineUpdateResponse;
 import gg.eventalerts.sdk.http.response.PaginatedResponse;
@@ -61,6 +63,11 @@ public class EAPlayers extends EAEndpoint {
         @NotNull
         public EAAction<EUOnlineUpdateResponse> postOnlineUpdate(@NotNull EUOnlineAuthUpdateBody body) {
             return super.postOne(EUOnlineUpdateResponse.class, "data", body, "online", "update");
+        }
+
+        @NotNull
+        public EAAction<EUDiscordLinkResponse> postLinkDiscord(@NotNull EUDiscordLinkBody body) {
+            return super.postOne(EUDiscordLinkResponse.class, "data", body, "link", "discord");
         }
     }
 }

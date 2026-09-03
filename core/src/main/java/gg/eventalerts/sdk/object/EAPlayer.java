@@ -81,7 +81,8 @@ public class EAPlayer extends EAObject {
         DISCORD_OAUTH,
         CODE_FROM_DISCORD,
         CODE_FROM_MINECRAFT,
-        CROSS_BAN
+        CROSS_BAN,
+        EVENTUTILS_DISCORD_OAUTH,
     }
 
     public static class Discord extends EAObject {
