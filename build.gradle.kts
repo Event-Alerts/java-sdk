@@ -1,45 +1,45 @@
-import xyz.srnyx.gradlegalaxy.data.config.DependencyConfig
-import xyz.srnyx.gradlegalaxy.data.config.JavaSetupConfig
-import xyz.srnyx.gradlegalaxy.data.config.publishing.publishingSimpleConfig
-import xyz.srnyx.gradlegalaxy.data.pom.DeveloperData
-import xyz.srnyx.gradlegalaxy.data.pom.LicenseData
-import xyz.srnyx.gradlegalaxy.enums.Repository
-import xyz.srnyx.gradlegalaxy.enums.repository
-import xyz.srnyx.gradlegalaxy.utility.setupJava
-import xyz.srnyx.gradlegalaxy.utility.setupPublishingEnv
-import xyz.srnyx.gradlegalaxy.utility.setupTesting
-
 plugins {
     base
-    id("xyz.srnyx.gradle-galaxy") version "8d36906" apply false
+    id("xyz.srnyx.gradle-galaxy") version "c99868f"
 }
 
 subprojects {
     apply(plugin = "java-library")
     apply(plugin = "xyz.srnyx.gradle-galaxy")
 
-    setupJava(config = JavaSetupConfig(
-        group = "gg.eventalerts",
-        javaVersion = JavaVersion.VERSION_1_8))
+    group = "gg.eventalerts"
 
-    repository(Repository.SRNYX_RELEASES, Repository.SRNYX_SNAPSHOTS, Repository.MAVEN_CENTRAL)
+    galaxy {
+        java {
+            javaVersion = JavaVersion.VERSION_1_8
+        }
+
+        repository {
+            add(SRNYX_RELEASES, SRNYX_SNAPSHOTS, MAVEN_CENTRAL)
+        }
+
+        testing {
+            jUnit("5.14.4")
+        }
+
+        mavenPublishing {
+            groupId = "gg.eventalerts.sdk"
+            artifactId = name
+            licenses.add(GPL_V3)
+            developers.add(SRNYX)
+            silenceMissingJavadocWarnings = true
+
+            publication { pom {
+                url = "https://eventalerts.gg/api/sdk"
+            } }
+        }
+    }
 
     dependencies {
         val annotations = "org.jetbrains:annotations:26.1.0"
         add("compileOnly", annotations)
         add("testCompileOnly", annotations)
     }
-
-    // Setup testing
-    setupTesting(junitBomConfig = DependencyConfig(version = "5.14.4"))
-
-    // Setup publishing
-    setupPublishingEnv(publishingSimpleConfig(
-        groupId = "gg.eventalerts.sdk",
-        artifactId = name,
-        url = "https://eventalerts.gg/api/sdk",
-        licenses = listOf(LicenseData.GPL_V3),
-        developers = listOf(DeveloperData.srnyx)))
 }
 
 // Copy subproject JARs to root build/libs
