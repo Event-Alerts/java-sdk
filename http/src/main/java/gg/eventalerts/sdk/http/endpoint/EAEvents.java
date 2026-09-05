@@ -28,6 +28,11 @@ public class EAEvents extends EAEndpoint {
     }
 
     @NotNull
+    public EAAction<List<EAEvent>> retrieveAll(@Nullable Map<String, Object> queryParams) {
+        return super.retrieveAll(EAEvent.class, "events", queryParams);
+    }
+
+    @NotNull
     public EAAction<EAEvent> retrieveOne(@NotNull String... pathSegments) {
         return super.retrieveOne(EAEvent.class, "event", pathSegments);
     }

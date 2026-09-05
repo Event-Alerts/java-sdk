@@ -28,6 +28,11 @@ public class EAPartnerServers extends EAEndpoint {
     }
 
     @NotNull
+    public EAAction<List<EAPartnerServer>> retrieveAll(@Nullable Map<String, Object> queryParams) {
+        return super.retrieveAll(EAPartnerServer.class, "servers", queryParams);
+    }
+
+    @NotNull
     public EAAction<EAPartnerServer> retrieveOne(@NotNull String... pathSegments) {
         return super.retrieveOne(EAPartnerServer.class, "server", pathSegments);
     }

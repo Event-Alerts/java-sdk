@@ -85,6 +85,33 @@ public abstract class EAEndpoint {
     }
 
     /**
+     * Auto-paginates to collect all items (or fewer if the API has less)
+     * <br>
+     * <br><b>Only use this if you are sure the endpoint will not return a large number of items, as it will make multiple requests until all items are retrieved.</b>
+     *
+     * @param   fieldName   the field name of the list in the response JSON
+     * @param   queryParams optional query parameters (page/limit are ignored)
+     *
+     * @return  action yielding the accumulated list
+     *
+     * @param   <O> the type of object to retrieve
+     */
+    @NotNull
+    public <O extends EAObject> EAAction<List<O>> retrieveAll(@NotNull Class<O> objectType, @NotNull String fieldName, @Nullable Map<String, Object> queryParams) {
+        return new EAAction<>("GET " + path, () -> {
+            final List<O> result = new ArrayList<>();
+            int page = 1;
+            while (true) {
+                final PaginatedResponse<O> response = executePage(objectType, fieldName, queryParams, page, null);
+                result.addAll(response.items);
+                if (response.count < response.limit || result.size() >= response.total) break;
+                page++;
+            }
+            return result;
+        });
+    }
+
+    /**
      * Retrieves a single object with a path
      *
      * @param   pathSegments    the path segments to append to the endpoint path

@@ -28,6 +28,11 @@ public class EACrossBans extends EAEndpoint {
     }
 
     @NotNull
+    public EAAction<List<EACrossBan>> retrieveAll(@Nullable Map<String, Object> queryParams) {
+        return super.retrieveAll(EACrossBan.class, "cross_bans", queryParams);
+    }
+
+    @NotNull
     public EAAction<EACrossBan> retrieveOne(@NotNull String... pathSegments) {
         return super.retrieveOne(EACrossBan.class, "cross_ban", pathSegments);
     }

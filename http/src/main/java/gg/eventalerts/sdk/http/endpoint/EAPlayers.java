@@ -36,6 +36,11 @@ public class EAPlayers extends EAEndpoint {
     }
 
     @NotNull
+    public EAAction<List<EAPlayer>> retrieveAll(@Nullable Map<String, Object> queryParams) {
+        return super.retrieveAll(EAPlayer.class, "players", queryParams);
+    }
+
+    @NotNull
     public EAAction<EAPlayer> retrieveOne(@NotNull String... pathSegments) {
         return super.retrieveOne(EAPlayer.class, "player", pathSegments);
     }
