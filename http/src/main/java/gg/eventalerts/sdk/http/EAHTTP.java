@@ -1,11 +1,7 @@
 package gg.eventalerts.sdk.http;
 
 import gg.eventalerts.sdk.EventAlertsSDK;
-import gg.eventalerts.sdk.http.endpoint.EACrossBans;
-import gg.eventalerts.sdk.http.endpoint.EAEvents;
-import gg.eventalerts.sdk.http.endpoint.EAPartnerServers;
-import gg.eventalerts.sdk.http.endpoint.EAPlayers;
-import gg.eventalerts.sdk.http.endpoint.EAServerApplications;
+import gg.eventalerts.sdk.http.endpoint.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,6 +19,7 @@ public class EAHTTP {
     @NotNull public final EAPartnerServers partnerServers = new EAPartnerServers(this);
     @NotNull public final EAPlayers players = new EAPlayers(this);
     @NotNull public final EAServerApplications serverApplications = new EAServerApplications(this);
+    @NotNull public final EAEventPresets eventPresets = new EAEventPresets(this);
 
     private EAHTTP(@NotNull String url, @NotNull String userAgent, @NotNull Map<String, String> headers) {
         this.url = url;
