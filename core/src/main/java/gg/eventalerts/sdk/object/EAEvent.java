@@ -197,7 +197,8 @@ public class EAEvent extends EAObject {
 
     public enum Source {
         DISCORD,
-        API
+        API,
+        EVENT_UTILS,
     }
 
     public enum Platform {
